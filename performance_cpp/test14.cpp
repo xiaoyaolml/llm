@@ -9,7 +9,7 @@
 //   cl /std:c++17 /O2 /EHsc /arch:AVX2 test14.cpp
 //
 // ─────────────────────────────────────────────────────────────
-// 目录 (40 章)
+// 目录 (46 章)
 // ═══════════════════════════════════════════════════════════════
 //
 // 一、CPU 流水线基础篇
@@ -65,6 +65,14 @@
 //  38.  perf 实战: Top-Down 分析法
 //  39.  Intel VTune / AMD μProf
 //  40.  微架构优化检查清单
+//
+// 八、扩展专题篇
+//  41.  投机执行安全 (Spectre/Meltdown)
+//  42.  硬件预取器行为深度分析
+//  43.  SIMD 指令集与微架构交互 (AVX/AVX-512)
+//  44.  内存带宽分析与 Roofline 模型
+//  45.  多路 NUMA 深度分析
+//  46.  编译器对微架构的认知与精细控制
 // ═══════════════════════════════════════════════════════════════
 
 #include <iostream>
@@ -2815,6 +2823,673 @@ void demo() {
 
 
 // =============================================================================
+// 八、扩展专题 (第 41–46 章)
+// =============================================================================
+
+// =============================================================================
+// 第 41 章：投机执行安全 — Spectre / Meltdown 与缓解代价
+// =============================================================================
+namespace ch41 {
+
+void demo() {
+    std::cout << "\n[CH41] 投机执行安全 (Spectre/Meltdown)\n";
+    std::cout << R"(
+=== 第 41 章：投机执行安全 ===
+
+【背景】现代 CPU 为了提高 IPC 而进行推测式(投机)执行:
+  - 分支预测后继续取指/执行，结果可能被撤销
+  - cache miss 期间推测性地执行后续指令
+  - 乱序窗口内"可见但还未提交"的状态暴露了安全漏洞
+
+【Spectre V1: 边界检查绕过 (CVE-2017-5753)】
+  攻击原理:
+  if (idx < array_size) {       //← 预测"taken"，在EX验证前已投机访问
+      x = array1[idx];           //← 越界 idx → 读取越界数据
+      y = array2[x * 64];        //← cache side channel: 这行被加载!
+  }
+  // 即使分支被撤销，array2 对应索引的 cache 行已被加载
+  // 攻击者通过测量 array2[i] 的访问延迟推断越界数据
+
+  缓解方案:
+  1. LFENCE 序列化: if (idx < size) { _mm_lfence(); use(idx); }
+     代价: ~10-50 cycles 额外延迟
+  2. Index masking: idx = idx & (size-1)  (保证合法范围)
+  3. Retpoline (return trampoline): 替换间接跳转
+     __asm__(
+       "call setup_target\n"
+       "jmp retpoline_loop\n"      // 无限循环欺骗 BTB
+       "setup_target:\n"
+       "movq %%rax, (%%rsp)\n"     // 设置真实目标
+       "ret\n"                       // 通过 RAS 预测 → 走 Retpoline loop
+       "retpoline_loop:\n"
+       "pause\n"
+       "jmp retpoline_loop\n"
+       : : "a"(target) :
+     );
+
+【Meltdown: 非法数据缓存加载 (CVE-2017-5754)】
+  攻击原理: 投机性地读取"无权访问"的内核内存并通过 cache 泄露
+  缓解: KPTI (Kernel Page Table Isolation) — 用户态/内核态分离页表
+
+  KPTI 代价:
+  ┌────────────────────────────────┬───────────────────────────────┐
+  │ 场景                           │ 代价                          │
+  ├────────────────────────────────┼───────────────────────────────┤
+  │ 无 PCID + KPTI                 │ 每次 syscall 完全刷 TLB       │
+  │                                │ → 性能损失 5%~40%             │
+  │ PCID + KPTI (Broadwell+)      │ 进程 TLB 保留                 │
+  │                                │ → 代价降至 ~1%~5%             │
+  │ Intel 10nm+ (Ice Lake+)        │ 硬件修复 Meltdown              │
+  │                                │ → 不需 KPTI，零代价           │
+  └────────────────────────────────┴───────────────────────────────┘
+
+【Spectre V2: 间接分支中毒 (CVE-2017-5715)】
+  攻击: 训练 BTB (分支目标缓冲) 指向攻击者gadget → 受害进程投机执行
+  缓解:
+  1. IBRS (Indirect Branch Restricted Speculation): 内核入口设置
+  2. Retpoline: 替换所有间接跳转 (GCC: -mindirect-branch=thunk)
+  3. eIBRS (Enhanced IBRS, Skylake+): 硬件保护，perf 代价更小
+
+【检查系统 Spectre 缓解状态】
+  cat /sys/devices/system/cpu/vulnerabilities/spectre_v1
+  cat /sys/devices/system/cpu/vulnerabilities/spectre_v2
+  cat /sys/devices/system/cpu/vulnerabilities/meltdown
+
+  典型输出:
+   spectre_v1: Mitigation: usercopy/swapgs barriers and __user pointer sanitization
+   spectre_v2: Mitigation: Retpolines, IBPB: conditional, IBRS_FW, ...
+   meltdown:   Not affected (Intel 10nm+) 或 Mitigation: PTI
+
+【代码实践: 安全 vs 性能权衡】
+  // 关键路径禁用某些缓解 (仅可信输入!)
+  prctl(PR_SET_SPECULATION_CTRL, PR_SPEC_STORE_BYPASS,
+        PR_SPEC_DISABLE, 0, 0);
+
+  // 序列化屏障 (阻止推测执行越过它)
+  _mm_lfence();    // Intel: Load Fence，阻止 Load 越过
+  asm("isb");      // ARM: Instruction Synchronization Barrier
+)";
+}
+
+} // namespace ch41
+
+// =============================================================================
+// 第 42 章：硬件预取器行为深度分析
+// =============================================================================
+namespace ch42 {
+
+// 测量不同步长下硬件预取效果
+static uint64_t measure_stride_access(size_t stride_bytes, size_t total_bytes) {
+    const size_t n = total_bytes / sizeof(uint64_t);
+    std::vector<uint64_t> data(n, 1);
+    const size_t stride = stride_bytes / sizeof(uint64_t);
+    if (stride == 0) return 0;
+
+    volatile uint64_t sink = 0;
+    auto t0 = std::chrono::high_resolution_clock::now();
+    for (size_t i = 0; i < n * stride; i += stride)
+        sink += data[i % n];
+    auto t1 = std::chrono::high_resolution_clock::now();
+    (void)sink;
+    return (uint64_t)std::chrono::duration_cast<std::chrono::microseconds>(t1-t0).count();
+}
+
+void demo() {
+    std::cout << "\n[CH42] 硬件预取器行为分析\n";
+    std::cout << R"(
+=== 第 42 章：硬件预取器行为深度分析 ===
+
+【Intel 4个硬件预取器 (L1/L2 各2个)】
+
+  L1 Prefetchers:
+  ┌─────────────────────┬────────────────────────────────────────────┐
+  │ 名称                │ 触发条件                                    │
+  ├─────────────────────┼────────────────────────────────────────────┤
+  │ L1 Streamer         │ 2+ 次连续 cache miss, 步长 ≤ 2048B         │
+  │ L1 Spatial Prefetch │ 同 4KB 页内相邻 cache line                 │
+  └─────────────────────┴────────────────────────────────────────────┘
+
+  L2 Prefetchers:
+  ┌─────────────────────┬────────────────────────────────────────────┐
+  │ 名称                │ 触发条件                                    │
+  ├─────────────────────┼────────────────────────────────────────────┤
+  │ L2 Streamer         │ 多次 L1 miss 形成流, 预取到 L2             │
+  │ L2 Adjacent Line    │ L2 miss 时同时预取相邻缓存行               │
+  └─────────────────────┴────────────────────────────────────────────┘
+
+【预取器失效场景】
+  1. 步长 > 2048B → L1 Streamer 停止预取 (看不出规律)
+  2. 随机访问 (链表遍历) → 所有预取器失效
+  3. 步长 = 缓存行 (64B) 但不规则 → Spatial 失效
+  4. 访问多个独立流 (>8~16) → 预取器资源耗尽
+
+【手动预取 vs 硬件预取】
+
+  // __builtin_prefetch(addr, rw, locality)
+  //   rw: 0=读预取, 1=写预取
+  //   locality: 0=不缓存, 1=L3, 2=L2, 3=L1(最高优先级)
+
+  // 典型用法: 提前 N 个 cache line 预取
+  for (int i = 0; i < N; ++i) {
+      __builtin_prefetch(&arr[i + 16], 0, 1);  // 16 cache lines = 1KB 提前
+      process(arr[i]);
+  }
+
+  // 提前距离的选择:
+  //   太早 → 预取出来已被驱逐(数据集太大)
+  //   太晚 → 数据还未就绪(距离太短)
+  //   最优 ≈ L2 延迟 / 单步处理时间 ≈ 10~30 个 cache line
+
+  // 非规则访问: 软件预取优于硬件预取
+  for (int i = 0; i < N; ++i) {
+      __builtin_prefetch(&table[key[i+8]], 0, 1);  // 提前 8 步
+      result += table[key[i]];
+  }
+
+【AMD 预取器差异】
+  Zen 3/4: 额外拥有 Op Cache 级别的预测取指
+  IP-based Stride Prefetcher: 基于 PC 的步长记录 → 每个指令独立的步长历史
+  相比 Intel 可预测更短的步长 (甚至 1×) 和更复杂的模式
+
+【关闭/控制预取器 (调试用)】
+  # Intel MSR 0x1A4 控制预取器开关
+  sudo wrmsr -a 0x1A4 0xF   # 关闭全部 4 个预取器
+  sudo wrmsr -a 0x1A4 0x0   # 重新启用
+
+  # 通过 PRFM 指令 (ARM)
+  asm("prfm pldl1strm, [%0]" : : "r"(addr));   // Stream L1
+  asm("prfm pldl2keep, [%0]" : : "r"(addr));   // Keep L2
+)";
+
+    // 实测不同步长的访问时间
+    constexpr size_t TOTAL = 16 * 1024 * 1024;  // 16MB, 超出 L3
+    std::cout << "\n  步长访问延迟测试 (16MB 数据集):\n";
+    std::cout << "  注: 步长 <= 2048B 时硬件预取激活，延迟更低\n";
+    size_t strides[] = {64, 128, 256, 512, 1024, 2048, 4096, 8192};
+    for (size_t s : strides) {
+        uint64_t us = measure_stride_access(s, TOTAL);
+        std::cout << "  stride=" << std::setw(5) << s << "B: "
+                  << std::setw(6) << us << " us"
+                  << (s <= 2048 ? " ← 预取器可覆盖" : " ← 预取器失效") << "\n";
+    }
+}
+
+} // namespace ch42
+
+// =============================================================================
+// 第 43 章：SIMD 指令集与微架构交互
+// =============================================================================
+namespace ch43 {
+
+void demo() {
+    std::cout << "\n[CH43] SIMD 指令集微架构交互 (AVX/AVX2/AVX-512)\n";
+    std::cout << R"(
+=== 第 43 章：SIMD 指令集与微架构交互 ===
+
+【SIMD 寄存器层次】
+  SSE:    XMM0~XMM15   128-bit  (16 bytes)
+  AVX/2:  YMM0~YMM15   256-bit  (32 bytes)
+  AVX-512: ZMM0~ZMM31  512-bit  (64 bytes) + 8 个 mask 寄存器 k0~k7
+
+【AVX-512 频率降档 (Intel 重要陷阱!)】
+
+  在 Skylake/Ice Lake/Rocket Lake 上:
+  ┌────────────────────────────────────┬─────────────────────────────┐
+  │ 场景                               │ 频率影响                    │
+  ├────────────────────────────────────┼─────────────────────────────┤
+  │ 无 AVX-512 指令                    │ 基础频率 (3.6 GHz)          │
+  │ 执行 AVX-512 整数指令              │ AVX-512 Turbo (-300 MHz)    │
+  │ 执行 AVX-512 FP 重型指令 (VFMA)   │ AVX-512 Heavy (-500 MHz)    │
+  └────────────────────────────────────┴─────────────────────────────┘
+
+  影响时长: 降频后 ~1ms 才能恢复 → 若只有几条 512b 指令，得不偿失!
+
+  Intel Golden Cove (12th Gen) 改进: 减小了降频幅度 (~100-200 MHz)
+  AMD Zen 4: 原生 AVX-512 支持，无频率降档问题
+
+  最佳实践:
+  1. 热循环完全使用 AVX-512 (不要混用 AVX2 和 AVX-512)
+  2. 或者对 Skylake 目标使用 AVX2
+  3. 用 -march=sapphirerapids 或 -march=znver4 编译
+
+【执行端口与 SIMD 指令竞争】
+
+  Golden Cove SIMD 端口分布:
+  Port 0: FP MUL/FMA (256-bit), VEC SHUFFLE
+  Port 1: FP ADD/FMA (256-bit), VEC ALU
+  Port 5: VEC SHUFFLE, VPERMD, VPERMQ
+
+  // FMA (Fused Multiply-Add): 一条指令完成 a*b+c
+  // 延迟 4-5 cyc, 吞吐 2/cyc (Port 0+1)
+  __m256 r = _mm256_fmadd_ps(a, b, c);  // r = a*b + c
+
+  vs 分开写:
+  __m256 t = _mm256_mul_ps(a, b);       // 3 cyc
+  __m256 r = _mm256_add_ps(t, c);       // 4 cyc after t → 实际 7 cyc
+  // FMA 不仅快，还更精确 (中间结果不舍入)
+
+【数据重排惩罚 (Lane Crossing)】
+  256-bit YMM 由两个 128-bit lane 组成:
+  _mm256_permute2f128_ps  ← 跨 lane, 3 cyc on Port 5
+  _mm256_shuffle_ps       ← 同 lane, 1 cyc on Port 0/1/5
+
+  // 尽量保持数据在同一 lane 内操作
+  // 必须跨 lane 时 VPERM2I128 可批量处理
+
+【SIMD 对齐要求】
+  // 对齐读 (比非对齐快 10-15% 在老 CPU)
+  // 现代 CPU (Haswell+): 无明显差异，但跨 4KB 页边界仍有惩罚
+  float* p = (float*)_mm_malloc(64, 32);   // 32字节对齐 for AVX
+  __m256 v = _mm256_load_ps(p);            // 要求 32B 对齐
+  __m256 u = _mm256_loadu_ps(p);           // 无对齐要求 (推荐)
+  _mm_free(p);
+
+【寄存器压力 (AVX-512 的优势)】
+  普通 x86-64:  16 个 GP 寄存器 → 复杂循环 spill 到栈
+  AVX2:         16 个 YMM (ymm0~15) 
+  AVX-512:      32 个 ZMM (zmm0~31) → 减少 spill, 代码密度更高
+
+  // 手动向量化 SAXPY (y = a*x + y)
+  void saxpy_avx2(float a, float* x, float* y, int n) {
+      __m256 va = _mm256_set1_ps(a);
+      for (int i = 0; i < n; i += 8) {
+          __m256 vx = _mm256_loadu_ps(x + i);
+          __m256 vy = _mm256_loadu_ps(y + i);
+          vy = _mm256_fmadd_ps(va, vx, vy);  // vy = va*vx + vy
+          _mm256_storeu_ps(y + i, vy);
+      }
+  }
+
+【SIMD 分支: vcmps + blend】
+  // 无分支 SIMD: 向量比较 + 混合选择
+  __m256 mask = _mm256_cmp_ps(a, threshold, _CMP_GT_OS);  // a > threshold?
+  __m256 result = _mm256_blendv_ps(b, a, mask);            // mask? a : b
+)";
+}
+
+} // namespace ch43
+
+// =============================================================================
+// 第 44 章：内存带宽分析与 Roofline 模型
+// =============================================================================
+namespace ch44 {
+
+// STREAM-like benchmark: Triad: a[i] = b[i] + scalar * c[i]
+static double measure_triad_bandwidth() {
+    constexpr size_t N = 16 * 1024 * 1024;  // 16M doubles = 128MB per array
+    std::vector<double> a(N, 1.0), b(N, 2.0), c(N, 3.0);
+    const double scalar = 3.0;
+
+    // warm up
+    for (size_t i = 0; i < N; ++i) a[i] = b[i] + scalar * c[i];
+
+    auto t0 = std::chrono::high_resolution_clock::now();
+    for (size_t i = 0; i < N; ++i)
+        a[i] = b[i] + scalar * c[i];
+    auto t1 = std::chrono::high_resolution_clock::now();
+
+    double secs = std::chrono::duration<double>(t1 - t0).count();
+    double bytes = 3.0 * N * sizeof(double);  // 2 reads + 1 write
+    return bytes / secs / 1e9;  // GB/s
+}
+
+void demo() {
+    std::cout << "\n[CH44] 内存带宽分析与 Roofline 模型\n";
+
+    double bw = measure_triad_bandwidth();
+    std::cout << "  STREAM Triad 实测带宽: " << std::fixed
+              << std::setprecision(1) << bw << " GB/s\n";
+
+    std::cout << R"(
+=== 第 44 章：内存带宽分析与 Roofline 模型 ===
+
+【内存系统带宽层次】
+
+  各级带宽 (Intel Core i9-13900K 参考):
+  ┌───────────────────┬──────────────────┬────────────────────┐
+  │ 层级              │ 带宽             │ 延迟               │
+  ├───────────────────┼──────────────────┼────────────────────┤
+  │ L1D               │ ~3 TB/s (实际)   │ 4-5 cycles         │
+  │ L2                │ ~1 TB/s          │ 12 cycles          │
+  │ L3                │ ~200 GB/s        │ 40 cycles          │
+  │ DRAM (DDR5-5200×2)│ ~75-83 GB/s 理论 │ ~65 ns (~200 cyc)  │
+  │ DRAM (实际)        │ ~50-65 GB/s     │ — (带宽饱和)       │
+  └───────────────────┴──────────────────┴────────────────────┘
+
+【STREAM Benchmark (内存带宽标准测试)】
+
+  四种操作     代码                    读/写访存量
+  Copy:        a[i] = b[i]            2N bytes
+  Scale:       a[i] = s*b[i]          2N bytes
+  Add:         a[i] = b[i]+c[i]       3N bytes
+  Triad:       a[i] = b[i]+s*c[i]    3N bytes  ← 最常用
+
+  关键要求: 数组大小 >> LLC 大小 (否则测的是 L3 带宽)
+
+【Roofline 模型】
+
+  基本思想: 性能受限于 计算能力 或 内存带宽 中较小的一个
+
+  性能上界 = min(峰值FLOPS, 带宽 × 算术强度)
+
+  算术强度 (Arithmetic Intensity, AI):
+    AI = FLOPs / DRAM访问字节数  [单位: FLOP/Byte]
+
+  示例:
+  ┌──────────────────────┬────────────────┬───────────┬────────┐
+  │ 算法                 │ FLOPs          │ AI        │ 瓶颈   │
+  ├──────────────────────┼────────────────┼───────────┼────────┤
+  │ 向量加法 a=b+c       │ N              │ 1/24      │ 内存   │
+  │ SAXPY                │ 2N             │ 1/12      │ 内存   │
+  │ Dense MatMul N×N     │ 2N³            │ N/12      │ 计算   │
+  │ Sparse MatVec        │ 2nnz           │ ~0.25     │ 内存   │
+  │ FFT N logN           │ 5N log₂N       │ ~1.5      │ 中间   │
+  └──────────────────────┴────────────────┴───────────┴────────┘
+
+  Roofline 分析步骤:
+  1. 测量峰值 FLOPS: P = {cores} × {FMA/cyc} × 2 × {SIMD lanes} × frequency
+     例: 8 cores × 2 FMA × 2 × 8(AVX-512 float) × 4GHz = 1024 GFLOPS
+  2. 测量有效带宽 B (STREAM Triad)
+  3. 山脊点 (Ridge Point) = P / B  [FLOP/Byte]
+     例: 1000 GFLOPS / 50 GB/s = 20 FLOP/Byte
+  4. AI < 山脊点 → 内存密集，优化: 减少 DRAM 访问、SIMD 宽度、数据重用
+  5. AI > 山脊点 → 计算密集，优化: SIMD、FMA、ILP、低延迟循环
+
+【带宽饱和与多线程】
+
+  单核带宽通常达不到峰值, 需要多线程:
+  // 使用 OpenMP 填满内存带宽
+  #pragma omp parallel for schedule(static)
+  for (int i = 0; i < N; ++i)
+      a[i] = b[i] + scalar * c[i];
+
+  // 一般 4~8 线程就能打满 DRAM 带宽
+  // 更多线程: 带宽不再增加，但 NUMA 问题出现
+
+【带宽限制优化策略】
+  1. 降低工作数据集: 分块 (Tiling) + 缓存重用
+  2. 压缩数据: float16/int8 减少带宽 2×/4×
+  3. 增大算术强度: 融合多个操作 (kernel fusion)
+  4. 非临时写 (NT Store): 绕过缓存直接写 → 节省 RFO (Read-For-Ownership)
+  5. 预取: 软件预取减少延迟惩罚 (不增加带宽!)
+)";
+}
+
+} // namespace ch44
+
+// =============================================================================
+// 第 45 章：多路 NUMA 深度分析
+// =============================================================================
+namespace ch45 {
+
+void demo() {
+    std::cout << "\n[CH45] 多路 NUMA 架构深度分析\n";
+    std::cout << R"(
+=== 第 45 章：多路 NUMA (Non-Uniform Memory Access) ===
+
+【NUMA 产生原因】
+
+  单 socket DDR 通道数有限 (通常 4~6 通道, ~100-200 GB/s)
+  多 socket 系统: 每个 socket 有自己的 DDR → 累加带宽
+  但访问远端 socket 的内存有额外延迟
+
+  Intel 2-socket 系统:
+  ┌──────────────────────┐        ┌──────────────────────┐
+  │ Socket 0             │        │ Socket 1             │
+  │ Core 0..27           │◄──────►│ Core 28..55          │
+  │ L3: 52.5MB           │ UPI/QPI│ L3: 52.5MB           │
+  │ DDR5 × 6 channels   │        │ DDR5 × 6 channels   │
+  │ ~ 192 GB/s local     │        │ ~ 192 GB/s local     │
+  └──────────────────────┘        └──────────────────────┘
+                UPI 互连带宽: 单向 ~200 GB/s (双向 ~400 GB/s)
+
+  延迟对比:
+  ┌───────────────────────────┬────────────────┐
+  │ 访问类型                  │ 延迟           │
+  ├───────────────────────────┼────────────────┤
+  │ 本地 L3 hit               │ ~40 cycles     │
+  │ 本地 DRAM                 │ ~65 ns         │
+  │ 跨 socket (remote DRAM)   │ ~120-150 ns    │
+  │ 4-socket 最远             │ ~200-250 ns    │
+  └───────────────────────────┴────────────────┘
+
+【AMD EPYC NUMA 特殊性 (多 CCD 架构)】
+
+  Zen 4 EPYC Rome: 8 CCD (Core Complex Die) × 8 cores = 64 cores
+  每个 CCD 有独立的 32MB L3 Cache
+  CCD 之间通过 Infinity Fabric 互连
+
+  NUMA 域:
+  ┌─────────────────────────────────────────────────────────┐
+  │              EPYC 9654 (Genoa) 96-core                  │
+  │  CCD0[8C,32MB-L3]  CCD1  CCD2  CCD3  (NUMA Node 0)     │
+  │  CCD4[8C,32MB-L3]  CCD5  CCD6  CCD7  (仍 NUMA Node 0)  │
+  │  DDR5 × 12 channels                                     │
+  └─────────────────────────────────────────────────────────┘
+  BIOS "NPS4 mode" → 4个 NUMA 子域, 更低的跨-CCD 延迟
+
+  最优性能: 每个线程绑定到 CCD, 内存分配在本地 NUMA 域
+
+【NUMA 感知编程技术】
+
+  1. numactl 命令行绑定:
+     numactl --cpunodebind=0 --membind=0 ./app    # 绑定 Node 0
+     numactl --interleave=all ./app               # 内存跨 NUMA 轮询 (均匀带宽)
+
+  2. C API (libnuma):
+     #include <numa.h>
+     // 检查 NUMA 可用性
+     if (numa_available() < 0) { printf("No NUMA\n"); return; }
+
+     // 分配本地内存
+     void* p = numa_alloc_local(size);          // 在当前 CPU 的 NUMA 节点分配
+     void* p = numa_alloc_onnode(size, node);   // 指定 node
+
+     // 线程绑定
+     numa_run_on_node(0);      // 当前线程绑定到 node 0
+     numa_set_membind(mask);   // 内存分配限制在 mask 指定节点
+
+  3. First-Touch 策略 (Linux 默认):
+     // 内存 *第一次被触碰* 的线程决定它属于哪个 NUMA 节点
+     // 陷阱: 初始化线程在 Node 0, 工作线程在 Node 1 → 全部远端访问!
+     //
+     // 最佳实践: 由工作线程自己初始化数据
+     #pragma omp parallel for  // 工作线程同时初始化
+     for (int i=0; i<N; ++i) data[i] = 0.0f;  // first touch = 本线程所在node
+
+  4. 迁移已有内存页:
+     // mbind() 迁移内存到指定节点
+     mbind(addr, size, MPOL_BIND, &nodemask, maxnode, MPOL_MF_MOVE);
+
+  5. 内存策略:
+     MPOL_LOCAL:      优先本地 (推荐高性能)
+     MPOL_BIND:       严格绑定指定节点 (低延迟, 但内存可能不足)
+     MPOL_INTERLEAVE: 轮询分配 (高带宽工作负载)
+     MPOL_PREFERRED:  首选某节点, 满时其他节点
+
+【检测 NUMA 拓扑】
+  numactl --hardware          # 显示 NUMA 节点、距离矩阵
+  lstopo --of ascii           # 完整拓扑 (hwloc)
+  cat /sys/devices/system/node/node0/distance  # NUMA 距离表
+
+【NUMA 性能调优原则】
+  1. 线程亲和性: 将相关线程绑定到同一 socket/CCD
+  2. 数据本地性: First-touch 优化 + 使用 numa_alloc_local
+  3. 带宽均衡: 有 NUMA interleave 均衡带宽 (适合 HPC/KV 场景)
+  4. 容量规划: 预留 NUMA 本地内存余量 (防溢出到远端)
+)";
+}
+
+} // namespace ch45
+
+// =============================================================================
+// 第 46 章：编译器对微架构的认知与精细控制
+// =============================================================================
+namespace ch46 {
+
+// 演示不同优化属性的效果
+FORCE_INLINE int hot_compute(int a, int b) {
+    int result = 0;
+    for (int i = 0; i < 64; ++i)
+        result += (a * i + b * (i ^ 3)) & 0xFF;
+    return result;
+}
+
+[[gnu::cold, gnu::noinline]]
+static void cold_error_handler(const char* msg) {
+    std::cout << "  Error: " << msg << "\n";
+}
+
+void demo() {
+    std::cout << "\n[CH46] 编译器对微架构的认知与精细控制\n";
+    std::cout << R"(
+=== 第 46 章：编译器微架构感知编译优化 ===
+
+【-march 目标架构选项】
+
+  # 通用 (推荐发行版二进制)
+  -march=x86-64-v3    # AVX2+FMA+BMI2, ~2013+ CPU
+  -march=x86-64-v4    # AVX-512, ~2017+ Intel
+
+  # 精确目标
+  -march=znver4       # AMD Zen 4 (精确调度模型)
+  -march=sapphirerapids  # Intel Sapphire Rapids (Xeon 4th Gen)
+  -march=goldencove   # Intel Alder Lake P-core
+  -march=native       # 本机 CPU (不可移植, 最高性能)
+
+  # 查看 native 启用了哪些特性
+  g++ -Q --help=target -march=native 2>&1 | grep enabled
+
+【-mtune vs -march 区别】
+  -march=X: 同时设置指令集 + 调度模型 (不能用于更旧的CPU)
+  -mtune=X: 只调整调度策略 (指令集不变, 二进制可跑在旧CPU上)
+  
+  推荐:
+  -march=x86-64-v3 -mtune=znver4   # 向量化用 AVX2, 但调度按 Zen4 优化
+
+【关键编译器 flags】
+
+  性能相关:
+  -O3               # 开启全部优化 (含激进循环变换)
+  -Ofast            # -O3 + -ffast-math + -fno-protect-parens
+  -ffast-math       # 允许浮点重排 (不严格 IEEE754)
+  -fno-math-errno   # 数学函数不设 errno (少一个写)
+  -funroll-loops    # 循环展开 (增大代码体积!)
+  -fomit-frame-pointer  # 释放 RBP 为通用寄存器
+
+  调试/分析:
+  -fno-inline       # 禁止内联 (方便 perf 归因)
+  -pg               # gprof 插桩
+  -fprofile-generate / -fprofile-use  # PGO 两步编译
+
+【函数级别精细控制】
+
+  // 标记热/冷函数 (影响代码布局)
+  __attribute__((hot))   void hot_func() { /* 频繁调用 */ }
+  __attribute__((cold))  void cold_func() { /* 错误处理 */ }
+
+  // 指定函数级优化 (覆盖全局 -O 设置)
+  __attribute__((optimize("O3,unroll-loops,tree-vectorize")))
+  void critical_loop(float* a, float* b, int n) {
+      for (int i=0; i<n; ++i) a[i] += b[i];
+  }
+
+  // 强制内联 / 禁止内联
+  __attribute__((always_inline)) inline int fast_min(int a,int b){ return a<b?a:b; }
+  __attribute__((noinline))      void isolated_func() { /* 不要内联我 */ }
+
+  // 目标属性 (函数使用特定 ISA, 即使全局没有 -mavx2)
+  __attribute__((target("avx2,fma")))
+  void avx2_kernel(float* a, float* b, int n) {
+      for (int i=0; i<n; i+=8) {
+          __m256 va = _mm256_loadu_ps(a+i);
+          __m256 vb = _mm256_loadu_ps(b+i);
+          _mm256_storeu_ps(a+i, _mm256_add_ps(va, vb));
+      }
+  }
+
+【PGO 完整流程 (Profile Guided Optimization)】
+
+  步骤 1: 插桩编译
+  g++ -O2 -fprofile-generate -fprofile-dir=./pgo_data \
+      -march=native -o app app.cpp
+
+  步骤 2: 代表性输入运行 (收集 profile)
+  ./app < production_like_input1
+  ./app < production_like_input2
+
+  步骤 3: 利用 profile 优化
+  g++ -O3 -fprofile-use=./pgo_data -fprofile-correction \
+      -march=native -o app_pgo app.cpp
+
+  PGO 带来的优化:
+  ✓ 内联决策: 热函数优先内联
+  ✓ 分支布局: 热路径 fall-through (无跳转)
+  ✓ 代码布局: 热函数聚集 (I-Cache 友好)
+  ✓ 循环展开: 热循环更激进展开
+  典型收益: +5%~15%
+
+【AutoFDO (基于 perf 的 PGO)】
+
+  # 不需要插桩, 用生产环境 perf 数据!
+  perf record -g -e cycles:u -o perf.data ./app
+  create_llvm_prof --binary=./app --profile=perf.data --out=app.afdo
+  clang++ -O3 -fprofile-sample-use=app.afdo -o app_afdo app.cpp
+
+【LLVM-MCA 静态分析】
+
+  # 分析一段汇编的理论 IPC 和瓶颈
+  g++ -O3 -march=znver4 -S -o - inner_loop.cpp | \
+      llvm-mca -mcpu=znver4 -bottleneck-analysis
+
+  # 关键输出:
+  # Timeline: 每条指令的执行时间线
+  # Resource pressure: 哪个执行端口是瓶颈
+  # 每次迭代的理论 cycles
+
+  # 用注释标记分析范围:
+  // clang: #pragma clang loop vectorize(assume_safety) unroll(full)
+  asm volatile("# LLVM-MCA-BEGIN inner_loop");
+  for (int i=0; i<N; ++i) c[i] = a[i] * b[i] + c[i];
+  asm volatile("# LLVM-MCA-END inner_loop");
+
+【Compiler Explorer (Godbolt) 工作流】
+  1. 粘贴热循环代码到 godbolt.org
+  2. 选择编译器+flags
+  3. 查看生成汇编:
+     - vmulps, vaddps → 已向量化 (AVX)
+     - vfmadd231ps    → FMA 使用 ✓
+     - rep movsb      → 字符串/memcpy 优化 ✓
+     - imul           → 整数乘法 (3 cyc)
+     - idiv           → 整数除法 (20-90 cyc!) ← 重点关注
+  4. 在 godbolt 中 diff 两个版本的汇编
+
+【pragma hint (GCC/Clang 向量化控制)】
+  #pragma GCC optimize("O3,unroll-loops")
+  #pragma GCC target("avx2,fma")
+
+  // LLVM/Clang 专属
+  #pragma clang loop vectorize(enable)
+  #pragma clang loop unroll_count(4)
+  #pragma clang loop interleave_count(2)
+
+  // 标准 C++17/20
+  for (int i=0; i<N; ++i)
+      a[i] += b[i];  // 编译器会自动 SLP 向量化
+)";
+
+    // 演示 hot/cold 函数效果
+    volatile int sink = 0;
+    for (int i = 0; i < 1000; ++i)
+        sink += hot_compute(i, i*2+1);
+    (void)sink;
+    std::cout << "  热函数执行示例完成 (FORCE_INLINE + 64次迭代)\n";
+    cold_error_handler("演示冷路径函数 (cold attribute)");
+}
+
+} // namespace ch46
+
+// =============================================================================
 // main
 // =============================================================================
 
@@ -2885,6 +3560,15 @@ int main() {
     ch38::demo();
     ch39::demo();
     ch40::demo();
+
+    // 八、扩展专题
+    print_header("八、扩展专题篇");
+    ch41::demo();
+    ch42::demo();
+    ch43::demo();
+    ch44::demo();
+    ch45::demo();
+    ch46::demo();
 
     std::cout << "\n================================================================\n";
     std::cout << " 演示完成\n";

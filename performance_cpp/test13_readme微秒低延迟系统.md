@@ -1,4 +1,4 @@
-# 亚10微秒级低延迟系统 — C++ 实战完全教程
+# 微秒低延迟系统 — C++ 实战完全教程
 
 > **定位**：本教程对应 `test13.cpp`（3048 行，38 章），为超低延迟 C++ 系统开发提供从**测量方法论 → 内存/CPU/无锁优化 → 网络 I/O → 编译器/系统级调优 → 架构设计**的完整实战路径。与 `test14.cpp`（CPU 微架构）聚焦硬件特性不同，本文件聚焦**工程实践**——如何在真实系统中将端到端延迟压至 10μs 以下。
 
@@ -25,46 +25,46 @@ test13.exe
 
 ## 目录总览（38 章 × 8 篇）
 
-| 篇 | 章 | 主题 | 核心技术 |
-|---|---|---|---|
-| **一、延迟测量** | 1 | 高精度时钟与 rdtsc | rdtsc/rdtscp, TSC 校准, 时钟选择指南 |
-| | 2 | 延迟直方图 | p50/p90/p99/p99.9, HdrHistogram, 协调遗漏 |
-| | 3 | 热路径识别 | 零开销宏, 异步采集, perf/bpftrace |
-| **二、内存子系统** | 4 | 缓存行对齐 | alignas(64), false sharing, perf c2c, MESI |
-| | 5 | 内存预取 | prefetch(addr, rw, locality), 预取距离公式 |
-| | 6 | 大页 | 2MB/1GB, mmap MAP_HUGETLB, TLB miss 消除 |
-| | 7 | 对象池 | Freelist O(1), 零分配热路径, 预分配 |
-| | 8 | 竞技场分配器 | 线性分配 ~2ns, O(1) reset, 零碎片 |
-| | 9 | SoA vs AoS | 内存布局基准, SIMD 友好, 带宽效率 |
-| **三、CPU 调度** | 10 | CPU 亲和性 | isolcpus, nohz_full, rcu_nocbs |
-| | 11 | 忙等待 vs 阻塞 | spin/pause/yield/condvar 唤醒延迟实测 |
-| | 12 | 自旋锁 | TicketLock, 指数退避, TTAS, vs mutex |
-| | 13 | NUMA 感知 | 首次触摸策略, membind, 远程 +60ns |
-| | 14 | 分支预测 | likely/unlikely, branchless abs/min/max/clamp |
-| **四、无锁结构** | 15 | SPSC 队列 | 缓存行分离, cached head/tail, >100M ops/sec |
-| | 16 | MPSC 队列 | exchange-based push, 多生产者无锁入队 |
-| | 17 | SeqLock | 写者零阻塞, 读者乐观重试, MarketData |
-| | 18 | 无锁内存池 | CAS freelist, ABA 问题, Tagged pointer |
-| **五、网络 I/O** | 19 | 内核旁路 | DPDK ~1μs, Solarflare ~0.7μs, FPGA ~0.1μs |
-| | 20 | 零拷贝 | MSG_ZEROCOPY, DMA 直传, rte_mbuf |
-| | 21 | TCP 低延迟 | TCP_NODELAY, QUICKACK, SO_BUSY_POLL |
-| | 22 | UDP 组播 | 市场数据分发, recvmmsg 批量接收 |
-| | 23 | 网卡时间戳 | 硬件 timestamp, PTP 同步, 延迟审计 |
-| **六、编译器优化** | 24 | 编译器屏障 | asm volatile, volatile, restrict, pure/const |
-| | 25 | SIMD 向量化 | SSE/AVX/AVX-512, restrict, 自动向量化 |
-| | 26 | Intrinsics | popcount, clz, ctz, 位操作加速 |
-| | 27 | PGO | 插桩→收集→优化, 10-40% 提速 |
-| | 28 | LTO | 跨翻译单元内联, ThinLTO |
-| **七、系统调优** | 29 | 实时调度 | SCHED_FIFO, SCHED_DEADLINE |
-| | 30 | 中断亲和性 | IRQ 隔离, irqbalance 禁用 |
-| | 31 | 内核参数 | sysctl 网络/内存/调度参数 |
-| | 32 | CPU 频率锁定 | performance governor, C-State 禁用 |
-| | 33 | BIOS 调优 | HT/Turbo/C-State/Snoop Mode |
-| **八、架构设计** | 34 | 事件循环 | 单线程无锁, HFT 引擎, EventLoop |
-| | 35 | 流水线架构 | 多阶段 SPSC, Disruptor 模式 |
-| | 36 | 热/冷分离 | HOT_FUNC/COLD_FUNC, 热路径黄金法则 |
-| | 37 | 预计算查找表 | 编译期 CRC32, 价格转换 LUT |
-| | 38 | 生产调优 | 延迟陷阱清单, 监控指标, 系统架构 |
+| 篇                       | 章 | 主题               | 核心技术                                      |
+| ------------------------ | -- | ------------------ | --------------------------------------------- |
+| **一、延迟测量**   | 1  | 高精度时钟与 rdtsc | rdtsc/rdtscp, TSC 校准, 时钟选择指南          |
+|                          | 2  | 延迟直方图         | p50/p90/p99/p99.9, HdrHistogram, 协调遗漏     |
+|                          | 3  | 热路径识别         | 零开销宏, 异步采集, perf/bpftrace             |
+| **二、内存子系统** | 4  | 缓存行对齐         | alignas(64), false sharing, perf c2c, MESI    |
+|                          | 5  | 内存预取           | prefetch(addr, rw, locality), 预取距离公式    |
+|                          | 6  | 大页               | 2MB/1GB, mmap MAP_HUGETLB, TLB miss 消除      |
+|                          | 7  | 对象池             | Freelist O(1), 零分配热路径, 预分配           |
+|                          | 8  | 竞技场分配器       | 线性分配 ~2ns, O(1) reset, 零碎片             |
+|                          | 9  | SoA vs AoS         | 内存布局基准, SIMD 友好, 带宽效率             |
+| **三、CPU 调度**   | 10 | CPU 亲和性         | isolcpus, nohz_full, rcu_nocbs                |
+|                          | 11 | 忙等待 vs 阻塞     | spin/pause/yield/condvar 唤醒延迟实测         |
+|                          | 12 | 自旋锁             | TicketLock, 指数退避, TTAS, vs mutex          |
+|                          | 13 | NUMA 感知          | 首次触摸策略, membind, 远程 +60ns             |
+|                          | 14 | 分支预测           | likely/unlikely, branchless abs/min/max/clamp |
+| **四、无锁结构**   | 15 | SPSC 队列          | 缓存行分离, cached head/tail, >100M ops/sec   |
+|                          | 16 | MPSC 队列          | exchange-based push, 多生产者无锁入队         |
+|                          | 17 | SeqLock            | 写者零阻塞, 读者乐观重试, MarketData          |
+|                          | 18 | 无锁内存池         | CAS freelist, ABA 问题, Tagged pointer        |
+| **五、网络 I/O**   | 19 | 内核旁路           | DPDK ~1μs, Solarflare ~0.7μs, FPGA ~0.1μs  |
+|                          | 20 | 零拷贝             | MSG_ZEROCOPY, DMA 直传, rte_mbuf              |
+|                          | 21 | TCP 低延迟         | TCP_NODELAY, QUICKACK, SO_BUSY_POLL           |
+|                          | 22 | UDP 组播           | 市场数据分发, recvmmsg 批量接收               |
+|                          | 23 | 网卡时间戳         | 硬件 timestamp, PTP 同步, 延迟审计            |
+| **六、编译器优化** | 24 | 编译器屏障         | asm volatile, volatile, restrict, pure/const  |
+|                          | 25 | SIMD 向量化        | SSE/AVX/AVX-512, restrict, 自动向量化         |
+|                          | 26 | Intrinsics         | popcount, clz, ctz, 位操作加速                |
+|                          | 27 | PGO                | 插桩→收集→优化, 10-40% 提速                 |
+|                          | 28 | LTO                | 跨翻译单元内联, ThinLTO                       |
+| **七、系统调优**   | 29 | 实时调度           | SCHED_FIFO, SCHED_DEADLINE                    |
+|                          | 30 | 中断亲和性         | IRQ 隔离, irqbalance 禁用                     |
+|                          | 31 | 内核参数           | sysctl 网络/内存/调度参数                     |
+|                          | 32 | CPU 频率锁定       | performance governor, C-State 禁用            |
+|                          | 33 | BIOS 调优          | HT/Turbo/C-State/Snoop Mode                   |
+| **八、架构设计**   | 34 | 事件循环           | 单线程无锁, HFT 引擎, EventLoop               |
+|                          | 35 | 流水线架构         | 多阶段 SPSC, Disruptor 模式                   |
+|                          | 36 | 热/冷分离          | HOT_FUNC/COLD_FUNC, 热路径黄金法则            |
+|                          | 37 | 预计算查找表       | 编译期 CRC32, 价格转换 LUT                    |
+|                          | 38 | 生产调优           | 延迟陷阱清单, 监控指标, 系统架构              |
 
 ---
 
@@ -75,7 +75,7 @@ test13.exe
               │ cache/pipeline/SIMD/分支预测
               │
 test11.cpp ──┼── test13.cpp (本文件) ──── test9.cpp
-(无锁编程)   │   亚10μs 低延迟系统         (高并发)
+(无锁编程)   │   微秒低延迟系统         (高并发)
  atomic/RCU  │   完整工程实践               epoll/io_uring
  memory order│                              thread pool
               │
@@ -115,26 +115,26 @@ test11.cpp ──┼── test13.cpp (本文件) ──── test9.cpp
 
 ## 延迟量级参考（心中有数的数字）
 
-| 操作 | 延迟 | 备注 |
-|---|---|---|
-| L1 cache hit | ~1 ns | 最快的内存访问 |
-| L2 cache hit | ~4 ns | |
-| L3 cache hit | ~12 ns | |
-| DRAM 访问 | ~80 ns | 本地 NUMA 节点 |
-| DRAM 远程 (NUMA) | ~140 ns | 跨节点 +60ns |
-| 原子 CAS (无竞争) | ~5-10 ns | |
-| 原子 CAS (有竞争) | ~20-100 ns | 缓存行 ping-pong |
-| 分支预测失败 | ~15-20 cycles | 流水线清空 |
-| syscall (getpid) | ~100 ns | 最轻量级 |
-| mutex lock (无竞争) | ~25 ns | |
-| mutex lock (有竞争) | ~100-10000 ns | futex 唤醒 |
-| malloc (小对象) | ~100-500 ns | 可能触发 mmap |
-| 线程上下文切换 | ~1-5 μs | 含缓存冷启动 |
-| 条件变量唤醒 | ~5-15 μs | 含调度延迟 |
-| page fault | ~3-10 μs | |
-| TCP 发送 (loopback) | ~5-10 μs | 内核协议栈 |
-| DPDK 收发 | ~0.5-2 μs | 内核旁路 |
-| FPGA 数据通路 | ~0.1 μs | 纯硬件 |
+| 操作                | 延迟          | 备注             |
+| ------------------- | ------------- | ---------------- |
+| L1 cache hit        | ~1 ns         | 最快的内存访问   |
+| L2 cache hit        | ~4 ns         |                  |
+| L3 cache hit        | ~12 ns        |                  |
+| DRAM 访问           | ~80 ns        | 本地 NUMA 节点   |
+| DRAM 远程 (NUMA)    | ~140 ns       | 跨节点 +60ns     |
+| 原子 CAS (无竞争)   | ~5-10 ns      |                  |
+| 原子 CAS (有竞争)   | ~20-100 ns    | 缓存行 ping-pong |
+| 分支预测失败        | ~15-20 cycles | 流水线清空       |
+| syscall (getpid)    | ~100 ns       | 最轻量级         |
+| mutex lock (无竞争) | ~25 ns        |                  |
+| mutex lock (有竞争) | ~100-10000 ns | futex 唤醒       |
+| malloc (小对象)     | ~100-500 ns   | 可能触发 mmap    |
+| 线程上下文切换      | ~1-5 μs      | 含缓存冷启动     |
+| 条件变量唤醒        | ~5-15 μs     | 含调度延迟       |
+| page fault          | ~3-10 μs     |                  |
+| TCP 发送 (loopback) | ~5-10 μs     | 内核协议栈       |
+| DPDK 收发           | ~0.5-2 μs    | 内核旁路         |
+| FPGA 数据通路       | ~0.1 μs      | 纯硬件           |
 
 ---
 
@@ -1731,38 +1731,38 @@ constexpr auto CRC32_TABLE = [] {
 
 ## 附录 A：test13.cpp 扩展建议总结
 
-| 章 | 扩展方向 | 优先级 | 关联 |
-|---|---|---|---|
-| Ch1 | RDPMC 硬件计数器 / ARM CNTVCT / TSC 漂移校正 | 高 | test14 |
-| Ch2 | HdrHistogram 完整实现 / 协调遗漏检测 / 多直方图合并 | 高 | — |
-| Ch3 | eBPF USDT probe / 火焰图差分 / CI 延迟回归 | 高 | — |
-| Ch4 | MESI 状态转移延迟实测 / perf c2c 实战 | 中 | test14 |
-| Ch5 | 批量预取 / B-Tree 预取 / NTA 非临时预取 | 中 | — |
-| Ch6 | 1GB 大页 / THP 陷阱量化 / NUMA+大页 | 高 | Ch13 |
-| Ch7 | SLAB 分配器 / thread-local pool / pmr 标准分配器 | 高 | Ch8 |
-| Ch8 | 分页 Arena / pmr::monotonic_buffer_resource | 中 | Ch7 |
-| Ch9 | AoSoA 混合布局 / ECS 架构 / std::simd | 高 | Ch25 |
-| Ch10 | cset shield / HT 分析 / K8s cpuManager | 中 | — |
-| Ch11 | UMWAIT/TPAUSE / futex 内核路径 / eventfd | 中 | — |
-| Ch12 | MCS Lock / CLH Lock / std::atomic_flag | 高 | test11 |
-| Ch13 | libnuma API / CXL 延迟 / NUMA balancing 分析 | 中 | — |
-| Ch14 | CMOV 生成分析 / BTB miss / perf branch-misses | 中 | test14 |
-| Ch15 | 批量 push_n/pop_n / 等待策略模板 / Disruptor | 高 | Ch35 |
-| Ch16 | 无分配 MPSC / Vyukov 队列 / MPMC bounded | 高 | — |
-| Ch17 | SIMD 宽拷贝 / 双缓冲替代 / SeqLock + version | 中 | — |
-| Ch18 | Tagged pointer / Hazard Pointers / EBR | 高 | test11 |
-| Ch19 | DPDK 完整示例 / AF_XDP / OpenOnload | 高 | test7 |
-| Ch20-23 | BBR / QUIC / PTP / RSS / 校验和卸载 | 中 | test7 |
-| Ch24 | signal_fence / clobber 细节 / 函数级优化属性 | 中 | — |
-| Ch25 | AVX-512 降频 / Highway 库 / simdjson / SIMD TS | 高 | test14 |
-| Ch26 | PDEP/PEXT / CRC32 硬件 / AES-NI | 中 | — |
-| Ch27-28 | BOLT / AutoFDO / ThinLTO vs Full / Propeller | 高 | — |
-| Ch29-33 | PREEMPT_RT / mlockall / tuned-adm / cgroup | 高 | — |
-| Ch34 | io_uring 循环 / 无分配事件 / 定时器轮 | 高 | test9 |
-| Ch35 | Disruptor 完整实现 / 反压 / Seastar | 高 | Ch15 |
-| Ch36 | section(".hot") / flatten / 多版本函数 | 中 | — |
-| Ch37 | consteval LUT / PerfectHash / multi-level LUT | 中 | test12 |
-| Ch38 | Prometheus/Grafana / 延迟热力图 / 故障注入 | 高 | — |
+| 章      | 扩展方向                                            | 优先级 | 关联   |
+| ------- | --------------------------------------------------- | ------ | ------ |
+| Ch1     | RDPMC 硬件计数器 / ARM CNTVCT / TSC 漂移校正        | 高     | test14 |
+| Ch2     | HdrHistogram 完整实现 / 协调遗漏检测 / 多直方图合并 | 高     | —     |
+| Ch3     | eBPF USDT probe / 火焰图差分 / CI 延迟回归          | 高     | —     |
+| Ch4     | MESI 状态转移延迟实测 / perf c2c 实战               | 中     | test14 |
+| Ch5     | 批量预取 / B-Tree 预取 / NTA 非临时预取             | 中     | —     |
+| Ch6     | 1GB 大页 / THP 陷阱量化 / NUMA+大页                 | 高     | Ch13   |
+| Ch7     | SLAB 分配器 / thread-local pool / pmr 标准分配器    | 高     | Ch8    |
+| Ch8     | 分页 Arena / pmr::monotonic_buffer_resource         | 中     | Ch7    |
+| Ch9     | AoSoA 混合布局 / ECS 架构 / std::simd               | 高     | Ch25   |
+| Ch10    | cset shield / HT 分析 / K8s cpuManager              | 中     | —     |
+| Ch11    | UMWAIT/TPAUSE / futex 内核路径 / eventfd            | 中     | —     |
+| Ch12    | MCS Lock / CLH Lock / std::atomic_flag              | 高     | test11 |
+| Ch13    | libnuma API / CXL 延迟 / NUMA balancing 分析        | 中     | —     |
+| Ch14    | CMOV 生成分析 / BTB miss / perf branch-misses       | 中     | test14 |
+| Ch15    | 批量 push_n/pop_n / 等待策略模板 / Disruptor        | 高     | Ch35   |
+| Ch16    | 无分配 MPSC / Vyukov 队列 / MPMC bounded            | 高     | —     |
+| Ch17    | SIMD 宽拷贝 / 双缓冲替代 / SeqLock + version        | 中     | —     |
+| Ch18    | Tagged pointer / Hazard Pointers / EBR              | 高     | test11 |
+| Ch19    | DPDK 完整示例 / AF_XDP / OpenOnload                 | 高     | test7  |
+| Ch20-23 | BBR / QUIC / PTP / RSS / 校验和卸载                 | 中     | test7  |
+| Ch24    | signal_fence / clobber 细节 / 函数级优化属性        | 中     | —     |
+| Ch25    | AVX-512 降频 / Highway 库 / simdjson / SIMD TS      | 高     | test14 |
+| Ch26    | PDEP/PEXT / CRC32 硬件 / AES-NI                     | 中     | —     |
+| Ch27-28 | BOLT / AutoFDO / ThinLTO vs Full / Propeller        | 高     | —     |
+| Ch29-33 | PREEMPT_RT / mlockall / tuned-adm / cgroup          | 高     | —     |
+| Ch34    | io_uring 循环 / 无分配事件 / 定时器轮               | 高     | test9  |
+| Ch35    | Disruptor 完整实现 / 反压 / Seastar                 | 高     | Ch15   |
+| Ch36    | section(".hot") / flatten / 多版本函数              | 中     | —     |
+| Ch37    | consteval LUT / PerfectHash / multi-level LUT       | 中     | test12 |
+| Ch38    | Prometheus/Grafana / 延迟热力图 / 故障注入          | 高     | —     |
 
 ---
 
@@ -1770,7 +1770,7 @@ constexpr auto CRC32_TABLE = [] {
 
 ```
 ================================================================
- 亚10微秒级低延迟系统 — C++ 实战完全教程
+ 微秒低延迟系统 — C++ 实战完全教程
 ================================================================
 
 ╔══════════════════════════════════════════════════════╗

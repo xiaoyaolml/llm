@@ -64,7 +64,7 @@ test6.cpp (多线程基础)          test9.cpp (高并发架构)
     │           │               │              │
     ▼           ▼               ▼              ▼
  test7.cpp   test11.cpp    test14.cpp     test13.cpp
- (网络编程)  (无锁深入)   (CPU微架构)   (亚10μs系统)
+ (网络编程)  (无锁深入)   (CPU微架构)   (微秒系统)
    │           │               │              │
    │ epoll     │ RCU/         │ cache/       │ 低延迟
    │ TCP       │ memory       │ pipeline     │ 实时
