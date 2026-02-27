@@ -1,6 +1,6 @@
 # llm
 
 + llm notes
-+ Claude Opus 4.6 generated contents
++ AI generated contents
 + C++
 + Python
