@@ -681,6 +681,10 @@ public:
 | 每次重建 | fd_set 每次 select 后被修改 | `epoll` 状态持久 |
 | 跨平台 | ✅ Windows/Linux/Mac | epoll 只 Linux |
 
+> **NOTE (修正补充)**:
+> 在 Winsock 下 `FD_SETSIZE` 默认常见是 64（可在包含头文件前重定义），并非总是 1024。
+> 因此跨平台教程里应避免写死容量假设。
+
 ### 7.4 深入扩展
 
 **IO 多路复用对比表：**
@@ -946,6 +950,10 @@ static std::optional<HttpRequest> parse_request(NetworkBuffer& buf) {
 }
 ```
 
+> **NOTE (修正补充)**:
+> 当前实现是教学版简化：若请求体跨多个 TCP 分片，单次读取“剩余数据”并不等价于完整 Body。
+> 生产实现应严格按 `Content-Length`（或 chunked）持续读取并校验完整性。
+
 ### 10.4 深入扩展
 
 **当前实现的局限与扩展方向：**
@@ -1208,6 +1216,9 @@ bool connect_with_timeout(Socket& sock, const SocketAddress& addr,
     return err == 0;
 }
 ```
+
+> **NOTE (补充)**:
+> 超时连接辅助函数应确保“无论成功/失败都恢复 socket 原阻塞模式”，避免调用方后续行为出现隐式模式变化。
 
 ### 14.2 NetResult\<T\> — Rust-like 错误处理
 
@@ -1679,12 +1690,16 @@ send(10000 字节) → 实际可能只发 5000
 | 参数 | 说明 | 推荐 |
 |---|---|---|
 | `TCP_NODELAY` | 禁用 Nagle 算法 | 低延迟场景开启 |
-| `SO_REUSEADDR` | 地址复用 | 服务器**总是**开启 |
+| `SO_REUSEADDR` | 地址复用 | 服务器常用（按平台语义评估） |
 | `SO_KEEPALIVE` | TCP 保活 | 长连接开启 |
 | `SO_RCVBUF` / `SO_SNDBUF` | 收发缓冲区 | 根据带宽调整 |
 | `SO_LINGER` | 关闭行为 | 按需设置 |
 | `TCP_QUICKACK` | 快速 ACK (Linux) | 低延迟场景 |
 | `TCP_FASTOPEN` | TFO (Linux 3.7+) | 减少握手延迟 |
+
+> **NOTE (修正补充)**:
+> `SO_REUSEADDR` 在 Windows/POSIX 语义并不完全一致；某些 Windows 场景需结合 `SO_EXCLUSIVEADDRUSE` 防止端口劫持。
+> 因此不建议用“总是开启”这类绝对表达。
 
 ---
 

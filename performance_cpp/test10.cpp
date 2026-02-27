@@ -77,6 +77,7 @@
 #include <random>
 #include <optional>
 #include <bitset>
+#include <cmath>
 #else
 #define LINUX_ONLY 1
 #include <iostream>
@@ -103,6 +104,7 @@
 #include <random>
 #include <optional>
 #include <bitset>
+#include <cmath>
 
 // Linux 特有头文件
 #include <unistd.h>
@@ -240,8 +242,20 @@ public:
         rq_.push(t);
     }
 
+      double current_total_weight() const {
+        auto copy = rq_;
+        double total = 0.0;
+        while (!copy.empty()) {
+          total += copy.top().weight;
+          copy.pop();
+        }
+        return total;
+      }
+
     void simulate(int total_ticks) {
         std::cout << "  CFS 模拟 (" << total_ticks << " 个调度周期):\n\n";
+      // NOTE: 这是教学级近似模型，重点演示 vruntime/weight 关系，
+      // 并不覆盖内核 CFS 的全部细节（如睡眠补偿、负载跟踪、调度域迁移等）。
 
         std::map<int, double> runtime_map;
 
@@ -253,12 +267,11 @@ public:
             rq_.pop();
 
             // 计算总权重
-            double total_weight = current.weight;
-            // 简化：假设所有任务总权重固定
+            double total_weight = current.weight + current_total_weight();
             int nr_running = rq_.size() + 1;
 
             // 计算时间片
-            double timeslice = calc_timeslice(current, total_weight * nr_running / current.weight * current.weight, nr_running);
+            double timeslice = calc_timeslice(current, total_weight, nr_running);
 
             // 运行一个时间片
             double delta_exec = timeslice;
@@ -435,12 +448,19 @@ void demo_cpu_affinity() {
 #if LINUX_ONLY
     // 获取 CPU 数量
     int ncpus = sysconf(_SC_NPROCESSORS_ONLN);
+  if (ncpus <= 0) {
+    std::cout << "  无法获取在线 CPU 数量\n";
+    return;
+  }
     std::cout << "  在线 CPU 数: " << ncpus << "\n";
 
     // 获取当前进程 CPU 亲和性
     cpu_set_t mask;
     CPU_ZERO(&mask);
-    sched_getaffinity(0, sizeof(mask), &mask);
+    if (sched_getaffinity(0, sizeof(mask), &mask) != 0) {
+      std::cout << "  获取亲和性失败: " << strerror(errno) << "\n";
+      return;
+    }
 
     std::cout << "  当前亲和性: {";
     for (int i = 0; i < ncpus; ++i) {
@@ -454,11 +474,14 @@ void demo_cpu_affinity() {
     CPU_SET(0, &new_mask);
     if (sched_setaffinity(0, sizeof(new_mask), &new_mask) == 0) {
         std::cout << "  已绑定到 CPU 0\n";
+    } else {
+      std::cout << "  绑定 CPU 0 失败: " << strerror(errno) << "\n";
     }
 
     // 恢复
-    sched_setaffinity(0, sizeof(mask), &mask);
-    std::cout << "  已恢复原亲和性\n";
+    if (sched_setaffinity(0, sizeof(mask), &mask) == 0) {
+      std::cout << "  已恢复原亲和性\n";
+    }
 #endif
 
     // NUMA 概念
@@ -936,9 +959,10 @@ void demo_mmap() {
     int fd = open(path, O_RDONLY);
     if (fd >= 0) {
         struct stat st;
-        fstat(fd, &st);
-
-        if (st.st_size > 0) {
+      if (fstat(fd, &st) != 0) {
+        std::cout << "  fstat(" << path << ") 失败: " << strerror(errno) << "\n";
+        close(fd);
+      } else if (st.st_size > 0) {
             void* addr = mmap(nullptr, st.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
             if (addr != MAP_FAILED) {
                 std::cout << "  mmap 读取 " << path << " (前 200 字节):\n    ";
@@ -946,6 +970,9 @@ void demo_mmap() {
                 std::cout << content.substr(0, content.rfind('\n')) << "\n";
                 munmap(addr, st.st_size);
             }
+      } else {
+        std::cout << "  mmap 读取 " << path << "：该文件在 procfs 中可能报告大小为 0，改用 read() 路径更可靠\n";
+        std::cout << "    " << read_first_line(path) << "\n";
         }
         close(fd);
     }
@@ -2011,11 +2038,19 @@ void demo_proc_sys() {
 
     // 运行时间
     std::string uptime_str = read_first_line("/proc/uptime");
-    double uptime = std::stod(uptime_str);
+    double uptime = 0.0;
+    try {
+      uptime = std::stod(uptime_str);
+    } catch (...) {
+      std::cout << "    运行时间: (无法解析 /proc/uptime)\n";
+      uptime = -1.0;
+    }
+    if (uptime >= 0.0) {
     int days = (int)(uptime / 86400);
     int hours = ((int)uptime % 86400) / 3600;
     int mins = ((int)uptime % 3600) / 60;
     std::cout << "    运行时间: " << days << "天 " << hours << "时 " << mins << "分\n";
+    }
 
     // 网络统计
     std::cout << "\n  网络接口统计:\n";

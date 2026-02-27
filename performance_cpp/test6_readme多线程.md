@@ -741,7 +741,11 @@ t4: while(!y.load(seq_cst)); if(x.load(seq_cst)) z++;  // E,F
 | RISC-V | 弱序 (RVWMO) | 零 | `fence` 指令 |
 | POWER | 非常弱序 | 零 | `hwsync` |
 
-> **在 x86 上**：`acquire` 和 `release` 几乎是免费的（TSO 已经提供足够的保证）。`seq_cst` 需要 `mfence` 指令，约 20-30ns。
+> **在 x86 上**：`acquire` 和 `release` 通常较低开销（TSO 已提供较强保证）；`seq_cst` 可能引入更强序约束与额外同步成本。
+>
+> **NOTE (修正补充)**:
+> `seq_cst` 的具体实现不一定总是 `mfence`，也可能通过带 `lock` 前缀的原子指令等方式实现。
+> 开销与 CPU 代际、编译器和指令选择强相关，应以实测与反汇编为准。
 
 ---
 
@@ -951,6 +955,9 @@ void parallel_for_each(Iter begin, Iter end, Func f, int num_threads = 0) {
 }
 ```
 
+> **NOTE (补充)**:
+> `std::thread::hardware_concurrency()` 允许返回 0（未知值）。工程实现里应回退到 1，避免分块时出现除零或空分片异常。
+
 ### 14.2 手动并行 reduce
 
 ```cpp
@@ -1121,12 +1128,17 @@ template <typename InputIter, typename MapFunc, typename ReduceFunc>
 auto parallel_map_reduce(
     InputIter begin, InputIter end,
     MapFunc map_fn, ReduceFunc reduce_fn,
-    auto init, int num_threads = 0)
+    typename std::iterator_traits<InputIter>::value_type init,
+    int num_threads = 0)
 {
     // Map 阶段：数据分片，每个线程独立处理
     // Reduce 阶段：合并所有分片结果
 }
 ```
+
+> **NOTE (修正补充)**:
+> 这里将 `auto init` 改为显式模板相关类型，以保持严格 C++17 兼容。
+> `auto` 形参属于 C++20 的缩写函数模板语法。
 
 ### 17.2 示例1：平方和
 

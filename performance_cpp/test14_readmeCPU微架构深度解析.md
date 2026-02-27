@@ -5,7 +5,7 @@
 
 ## 📚 概览
 
-`test14.cpp` 是一份 **40 章、7 大专题** 的 CPU 微架构完整教程，每章包含：
+`test14.cpp` 是一份 **46 章、8 大专题** 的 CPU 微架构完整教程，每章包含：
 
 - 精确的 ASCII 架构图 + 中文注释
 - 可编译运行的基准测试代码
@@ -23,7 +23,7 @@ cl /std:c++17 /O2 /EHsc /arch:AVX2 test14.cpp
 
 ---
 
-## 目录 (40 章 / 7 大专题)
+## 目录 (46 章 / 8 大专题)
 
 | 专题 | 章节 | 核心主题 |
 |------|------|----------|
@@ -34,6 +34,7 @@ cl /std:c++17 /O2 /EHsc /arch:AVX2 test14.cpp
 | 五、乱序执行 | 25–32 | ROB、RAT、保留站、Store Buffer、ILP |
 | 六、前端优化 | 33–36 | I-Cache、μop Cache (DSB)、LSD、代码对齐 |
 | 七、性能计数器 | 37–40 | PMU、Top-Down、VTune/μProf、优化清单 |
+| 八、扩展专题 | 41–46 | 投机执行安全、预取器、SIMD、Roofline、NUMA、编译器控制 |
 
 ---
 
@@ -85,7 +86,7 @@ IF → ID → EX → MEM → WB
 | Neoverse V2 | 10-wide | ARM 服务器 |
 
 **实测发现**（test14 ch2 benchmark）：
-- 4 路独立累加 vs 串行依赖链，速度差异可达 **3–5×**
+- 4 路独立累加 vs 串行依赖链，常见可见明显差距（幅度依赖 CPU 与编译选项）
 - IPC 实际约 2–4（受限于依赖、Cache miss、分支）
 
 **IPC 四大限制因素**：
@@ -394,7 +395,7 @@ void* p = mmap(NULL, size, PROT_READ|PROT_WRITE,
 
 **PCID (Process Context ID)**（Intel Broadwell+）：每 TLB 条目带 12-bit 进程 ID → 进程切换无需完全刷新 TLB。
 
-**KPTI（Spectre/Meltdown 缓解）无 PCID 时**：每次 syscall 完全刷 TLB → 性能损失 30–40%。有 PCID 后代价降至 ~5%。
+**KPTI（Spectre/Meltdown 缓解）无 PCID 时**：syscall 场景下开销常更明显；有 PCID 后通常可显著降低代价，具体幅度依赖 CPU、内核版本与负载。
 
 ---
 
@@ -440,7 +441,7 @@ void* p = mmap(NULL, size, PROT_READ|PROT_WRITE,
 
 多态分派 → 类型数量越多 → IBTB 预测失败率越高。
 
-**优化**：按类型排序对象后批量处理，连续调用同类型 → BTB 命中率接近 100%。
+**优化**：按类型排序对象后批量处理，连续调用同类型通常可提高 BTB 命中率（提升幅度需实测）。
 
 ---
 
@@ -568,7 +569,7 @@ double sum = ((s0+s1)+(s2+s3)) + ((s4+s5)+(s6+s7));
 
 ### 第 35–36 章：LSD 与代码对齐
 
-**LSD**：循环体 ≤ 64 μops (Intel) → 直接从 LSD 供给，完全绕过 I-Cache。
+**LSD**：循环体较小且满足条件时，可能更多由 LSD/前端队列供给，从而减少前端取指与解码压力。
 
 **BOLT** 二进制布局优化：
 ```bash
@@ -643,9 +644,49 @@ perf stat --topdown -v ./app       # Level 2
 
 ---
 
+## 八、扩展专题篇 (第 41–46 章)
+
+### 第 41 章：投机执行安全
+
+- Spectre V1/V2 与 Meltdown 的基本机理
+- Retpoline / IBRS / KPTI 的工程权衡
+- 缓解收益与性能开销受硬件代际、微码、内核策略影响
+
+### 第 42 章：硬件预取器行为分析
+
+- L1/L2 Streamer 与 Spatial 预取器的触发规律
+- 步长、访问模式与预取器覆盖边界
+- 软件预取在不规则访问场景的补充价值
+
+### 第 43 章：SIMD 微架构交互
+
+- AVX/AVX2/AVX-512 的寄存器与执行端口关系
+- 部分平台上 AVX-512 重负载可能触发频率回退
+- 向量宽度、混用策略与吞吐/频率权衡
+
+### 第 44 章：内存带宽与 Roofline
+
+- STREAM/Triad 测量有效带宽
+- 算术强度 (AI) 与瓶颈判定
+- 内存受限与计算受限的优化路径分离
+
+### 第 45 章：NUMA 深度分析
+
+- 本地/远端内存延迟差异与 first-touch 策略
+- `numactl`/`libnuma` 绑定与迁移策略
+- 带宽均衡与低延迟绑定的场景取舍
+
+### 第 46 章：编译器微架构感知优化
+
+- `-march`/`-mtune` 的目标与可移植性平衡
+- PGO/AutoFDO/BOLT 的端到端流程
+- 函数级属性与循环 pragma 的精细化控制
+
+---
+
 ## 深入分析与扩展建议
 
-当前 40 章已覆盖 CPU 微架构的核心知识图谱。以下 6 个方向可进一步扩展：
+当前 46 章已覆盖 CPU 微架构核心知识图谱。后续可继续深化以下方向：
 
 | 扩展章节 | 主题 | 核心内容 |
 |----------|------|----------|
@@ -669,4 +710,4 @@ perf stat --topdown -v ./app       # Level 2
 
 ---
 
-*参照 test14.cpp（2895行，40章）编写*
+*参照 test14.cpp（约3579行，46章）编写*

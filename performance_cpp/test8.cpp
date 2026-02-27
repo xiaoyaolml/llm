@@ -75,6 +75,10 @@
 #include <initializer_list>
 #include <random>
 
+#if defined(_MSC_VER)
+#include <intrin.h>
+#endif
+
 // 工具
 class Timer {
     using Clock = std::chrono::high_resolution_clock;
@@ -91,7 +95,12 @@ public:
 
 template <typename T>
 void do_not_optimize(T&& val) {
+#if defined(_MSC_VER)
+    (void)val;
+    _ReadWriteBarrier();
+#else
     asm volatile("" : : "r,m"(val) : "memory");
+#endif
 }
 
 template <typename Container>
@@ -444,6 +453,10 @@ void demo_unordered() {
 
 void demo_perf_comparison() {
     constexpr int N = 1000000;
+
+    // NOTE:
+    // 此处基准主要用于展示“典型趋势”，具体结果强依赖键分布、哈希质量、
+    // 负载因子、内存分配器与 CPU 缓存行为，不应机械解读为固定倍数。
 
     // set (红黑树, O(log n))
     {
@@ -1278,6 +1291,10 @@ void demo_standard_functors() {
 
 // --- 15.2 std::function ---
 void demo_std_function() {
+    // NOTE:
+    // std::function 提供运行时多态与统一回调签名，代价是类型擦除开销，
+    // 热路径优先考虑模板参数传 callable 以便内联。
+
     // 可以持有任何可调用对象
     std::function<int(int, int)> op;
 

@@ -54,6 +54,7 @@
 #include <cstdint>
 #include <optional>
 #include <type_traits>
+#include <climits>
 
 using namespace std::chrono_literals; // 允许 100ms, 1s 等字面量
 
@@ -1525,10 +1526,18 @@ namespace ch14 {
 
 template <typename Iter, typename Func>
 void parallel_for_each(Iter begin, Iter end, Func f, int num_threads = 0) {
+    // NOTE: 空区间直接返回，避免后续分块逻辑产生无意义线程。
+    if (begin == end) return;
+
+    // NOTE: hardware_concurrency() 允许返回 0，需兜底到 1。
     if (num_threads <= 0)
-        num_threads = std::thread::hardware_concurrency();
+        num_threads = static_cast<int>(std::thread::hardware_concurrency());
+    if (num_threads <= 0)
+        num_threads = 1;
 
     auto total = std::distance(begin, end);
+    if (total < num_threads)
+        num_threads = static_cast<int>(total);
     auto chunk = total / num_threads;
 
     std::vector<std::thread> threads;
@@ -1554,10 +1563,17 @@ void parallel_for_each(Iter begin, Iter end, Func f, int num_threads = 0) {
 template <typename Iter, typename T, typename BinaryOp>
 T parallel_reduce(Iter begin, Iter end, T init, BinaryOp op,
                   int num_threads = 0) {
+    // NOTE: 空区间返回初始值，语义与串行 reduce 一致。
+    if (begin == end) return init;
+
     if (num_threads <= 0)
-        num_threads = std::thread::hardware_concurrency();
+        num_threads = static_cast<int>(std::thread::hardware_concurrency());
+    if (num_threads <= 0)
+        num_threads = 1;
 
     auto total = std::distance(begin, end);
+    if (total < num_threads)
+        num_threads = static_cast<int>(total);
     auto chunk = total / num_threads;
 
     std::vector<std::future<T>> futures;
@@ -1946,12 +1962,22 @@ auto parallel_map_reduce(
     typename std::iterator_traits<InputIter>::value_type init,
     int num_threads = 0)
 {
+    // NOTE: 空区间直接返回 init，避免首元素解引用风险。
+    if (begin == end) {
+        using EmptyT = decltype(map_fn(*begin));
+        return static_cast<EmptyT>(init);
+    }
+
     using T = decltype(map_fn(*begin));
 
     if (num_threads <= 0)
-        num_threads = std::thread::hardware_concurrency();
+        num_threads = static_cast<int>(std::thread::hardware_concurrency());
+    if (num_threads <= 0)
+        num_threads = 1;
 
     auto total = std::distance(begin, end);
+    if (total < num_threads)
+        num_threads = static_cast<int>(total);
     auto chunk_size = total / num_threads;
 
     // Map 阶段：每个线程处理一个分片

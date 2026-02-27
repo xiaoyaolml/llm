@@ -55,6 +55,10 @@
 #include <cassert>
 #include <tuple>
 
+#if defined(_MSC_VER)
+#include <intrin.h>
+#endif
+
 
 // =============================================================================
 // 工具
@@ -74,7 +78,12 @@ public:
 
 template <typename T>
 void do_not_optimize(T&& val) {
+#if defined(_MSC_VER)
+    (void)val;
+    _ReadWriteBarrier();
+#else
     asm volatile("" : : "r,m"(val) : "memory");
+#endif
 }
 
 
@@ -515,6 +524,10 @@ constexpr uint32_t ct_hash(std::string_view sv) {
     return h;
 }
 
+// NOTE:
+// 该模式用于高性能分发非常常见，但哈希方案理论上存在碰撞。
+// 生产代码中如果命令集合可变或来源不可信，建议在命中 case 后再做一次字符串比较确认。
+
 // 这个 switch 与用整数常量做 case 完全相同
 void dispatch(std::string_view cmd) {
     switch (ct_hash(cmd)) {
@@ -629,8 +642,11 @@ namespace ch7 {
 // optional<T> 内部就是 T + bool，无堆分配。
 // 与手写 struct { T value; bool has_value; } 完全相同。
 
-static_assert(sizeof(std::optional<int>) == sizeof(int) + sizeof(int),
-              "optional<int> = 8 bytes (int + padding for bool)");
+static_assert(sizeof(std::optional<int>) >= sizeof(int) + 1,
+              "optional<int> must store value plus engaged flag");
+// NOTE:
+// optional 的大小与 ABI/对齐策略相关，并不保证固定为 8 字节。
+// 这里使用可移植断言，避免在不同平台或标准库实现上误判。
 
 // --- 7.2 替代空指针 ---
 
@@ -805,6 +821,10 @@ void demo_variant_vs_virtual() {
             total += s->area();
         do_not_optimize(total);
     }
+
+    // NOTE:
+    // 该基准主要对比“数据布局 + 分派方式”的组合效果。
+    // variant 的优势通常来自连续内存与更高缓存命中率，不应简化为“virtual 本质更慢”。
 }
 
 } // namespace ch8
@@ -1823,7 +1843,8 @@ State on_event(const Running&, const SetSpeed& e)   { return Running{e.speed}; }
 State on_event(const Running&, const PowerOff&)     { return Stopping{}; }
 State on_event(const Stopping&, const Initialized&) { return Off{}; }
 // 任何状态遇到 Fault 都转到 Error
-State on_event(const auto&, const Fault& f)         { return Error_{f.message}; }
+template <typename S>
+State on_event(const S&, const Fault& f)            { return Error_{f.message}; }
 State on_event(const Error_&, const PowerOff&)      { return Off{}; }
 
 // FSM 类

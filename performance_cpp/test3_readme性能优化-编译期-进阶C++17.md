@@ -274,6 +274,9 @@ void must_not_call() {
 }
 ```
 
+> **NOTE (补充说明)**:
+> `static_assert(false)` 会在模板的**定义阶段**（第一阶段编译）就立即失败，无论该模板是否被实例化。而 `static_assert(always_false_v<T>)` 的求值依赖于模板参数 `T`，因此检查被延迟到模板的**实例化阶段**（第二阶段编译）。只有当 `if constexpr` 的分支被实际选择并实例化时，`static_assert` 才会触发，这正是我们想要的行为。
+
 ---
 
 ## 第3章：折叠表达式 (Fold Expressions) — C++17 新增
@@ -442,6 +445,9 @@ Overloaded(Funcs...) -> Overloaded<Funcs...>; // 推导指引
 //     [](auto x)   { ... }
 // }, my_variant);
 ```
+
+> **NOTE (补充说明)**:
+> CTAD 并非万能。当构造函数的参数类型与类模板参数类型不完全匹配时（例如，构造函数接受 `const char*`，但你想推导出一个存储 `std::string` 的类），或者当多个构造函数可能导致推导歧义时，就需要手动编写**推导指引 (deduction guide)** 来指导编译器。
 
 ---
 
@@ -633,6 +639,9 @@ void handle_http_method(std::string_view method) {
 }
 ```
 
+> **NOTE (补充说明)**:
+> 这种基于哈希的 `switch` 技巧非常高效，但存在**哈希碰撞**的理论风险（两个不同的字符串产生相同的哈希值）。虽然 FNV-1a 算法在实践中碰撞率极低，但在需要绝对安全保障的场景下，可以在 `default` 分支中添加对原始字符串的二次检查。更安全的编译期字符串匹配可以使用 C++20 的 `consteval` 和 `std::is_constant_evaluated()` 来实现。
+
 ### 7.5 编译期字符串比较器
 
 ```cpp
@@ -760,6 +769,9 @@ void smart_print(const T& value) {
     std::cout << "\n";
 }
 ```
+
+> **NOTE (补充说明)**:
+> `std::void_t` 和相关的 SFINAE 技术是 C++20 之前的标准做法。虽然强大，但语法晦涩，且编译器错误信息往往不友好。在 C++20 及以后的项目中，应**优先使用 Concepts**，因为它提供了更清晰的语法、更强的表达能力和更易读的错误信息。理解 SFINAE 对于阅读和维护旧的 C++14/17 代码库仍然至关重要。
 
 ---
 
@@ -976,7 +988,7 @@ public:
     constexpr Value at(const Key& key) const {
         for (const auto& [k, v] : data_)
             if (k == key) return v;
-        return Value{};
+        throw "Key not found"; // 在 constexpr 上下文中会引发编译错误
     }
     constexpr bool contains(const Key& key) const {
         for (const auto& [k, v] : data_)
@@ -985,7 +997,15 @@ public:
     }
 };
 
-constexpr auto HTTP_STATUS = make_const_map<std::string_view, int>({
+// 辅助函数，用于从C风格数组创建ConstMap
+template <typename Key, typename Value, size_t N>
+constexpr auto make_const_map(const std::pair<Key, Value> (&items)[N]) {
+    std::array<std::pair<Key, Value>, N> arr{};
+    for (size_t i = 0; i < N; ++i) arr[i] = items[i];
+    return ConstMap<Key, Value, N>(arr);
+}
+
+constexpr auto HTTP_STATUS = make_const_map<const char*, int>({
     {"OK", 200}, {"Not Found", 404}, {"Internal Server Error", 500},
     {"Bad Request", 400}, {"Unauthorized", 401},
 });
@@ -994,6 +1014,13 @@ static_assert(HTTP_STATUS.at("OK") == 200, "OK=200");
 static_assert(HTTP_STATUS.at("Not Found") == 404, "404");
 static_assert(HTTP_STATUS.contains("Bad Request"), "has Bad Request");
 ```
+
+> **NOTE (修正与改进)**:
+> 原 `make_const_map` 的实现 `std::pair<Key, Value> (&&items)[N]` 无法从初始化列表推导，且 `at` 函数在找不到键时返回 `Value{}` 可能导致意外行为。
+>
+> 1.  **修正 `make_const_map`**: 将参数类型改为 `const std::pair<Key, Value> (&items)[N]`，使其能正确接受一个由初始化列表构造的C风格数组。
+> 2.  **改进 `at` 函数**: 在 `constexpr` 上下文中，如果找不到键，通过 `throw` 一个字符串字面量来触发编译时错误，这比返回默认构造的值更安全、意图更明确。
+> 3.  **类型修正**: `HTTP_STATUS` 的 `Key` 类型应为 `const char*` 以匹配字符串字面量，而非 `std::string_view`。
 
 ---
 

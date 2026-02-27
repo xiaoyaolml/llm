@@ -133,7 +133,9 @@ struct alignas(CACHE_LINE_SIZE) PaddedAtomic {
 };
 ```
 
-> **设计说明**：`PaddedAtomic` 利用 `alignas(64)` 保证每个原子变量独占一条缓存行。在多核高频写场景中，消除 false sharing 可带来 **5-20x** 的吞吐提升。
+> **设计说明**：`PaddedAtomic` 利用 `alignas(64)` 让热点原子变量更容易分离到不同缓存行。在多核高频写场景中，消除 false sharing 通常会显著提升吞吐，但提升倍数依赖 CPU 拓扑、线程绑核、访问模式与编译器优化。
+
+> NOTE：`alignas(64)` 不是“所有平台缓存行都固定 64B”的保证。工程中可结合 `std::hardware_destructive_interference_size`（若工具链支持）与基准实测。
 
 ---
 
@@ -218,6 +220,8 @@ public:
     }
 };
 ```
+
+> NOTE：若在 MSVC 下使用 `_mm_pause()`，需包含 `<intrin.h>`；GCC/Clang 通常使用 `<immintrin.h>` 或编译器内建。示例代码建议按编译器条件包含头文件。
 
 **指数退避原理**：
 
@@ -594,7 +598,7 @@ void demo_mpmc_queue() {
 
 ### 深入扩展
 
-1. **SPSC 队列优化**：单生产者单消费者可去掉所有 CAS，仅用 `relaxed` load/store + `acquire/release` fence，吞吐量可达 **数亿 ops/s**
+1. **SPSC 队列优化**：单生产者单消费者可去掉所有 CAS，仅用 `relaxed` load/store + `acquire/release` fence，在合适硬件与负载下可达到很高吞吐（常见千万级至上亿级 ops/s，需以实测为准）
 2. **动态扩容**：当前 `try_enqueue` 返回 false 时丢弃；可实现多段链表式无界队列（如 `boost::lockfree::queue`）
 3. **`moodycamel::ConcurrentQueue`**：生产级 MPMC 队列，内部使用隐式生产者令牌 + 块链表，减少 CAS 争用
 4. **批量入队/出队**：`try_enqueue_bulk()` 一次占据多个连续槽位，减少原子操作次数
@@ -612,13 +616,18 @@ namespace ch4 {
 template <typename K, typename V, int NUM_STRIPES = 16>
 class ConcurrentHashMap {
     struct Stripe {
-        std::shared_mutex mutex;
+        mutable std::shared_mutex mutex;
         std::unordered_map<K, V> map;
     };
 
     std::array<Stripe, NUM_STRIPES> stripes_;
 
     Stripe& get_stripe(const K& key) {
+        auto h = std::hash<K>{}(key);
+        return stripes_[h % NUM_STRIPES];
+    }
+
+    const Stripe& get_stripe(const K& key) const {
         auto h = std::hash<K>{}(key);
         return stripes_[h % NUM_STRIPES];
     }
@@ -630,8 +639,8 @@ public:
         stripe.map[key] = std::move(value);
     }
 
-    std::optional<V> get(const K& key) {
-        auto& stripe = get_stripe(key);
+    std::optional<V> get(const K& key) const {
+        const auto& stripe = get_stripe(key);
         std::shared_lock lock(stripe.mutex);  // 读锁 → 多读者并行
         auto it = stripe.map.find(key);
         if (it != stripe.map.end()) return it->second;
@@ -659,8 +668,8 @@ public:
     }
 
     // 快照遍历（非一致性）
-    void for_each(std::function<void(const K&, const V&)> fn) {
-        for (auto& stripe : stripes_) {
+    void for_each(std::function<void(const K&, const V&)> fn) const {
+        for (const auto& stripe : stripes_) {
             std::shared_lock lock(stripe.mutex);
             for (auto& [k, v] : stripe.map) fn(k, v);
         }
@@ -668,8 +677,8 @@ public:
 
     size_t size() const {
         size_t total = 0;
-        for (auto& stripe : stripes_) {
-            std::shared_lock lock(const_cast<std::shared_mutex&>(stripe.mutex));
+        for (const auto& stripe : stripes_) {
+            std::shared_lock lock(stripe.mutex);
             total += stripe.map.size();
         }
         return total;
@@ -691,7 +700,7 @@ ConcurrentHashMap  (16 Stripes)
 
 hash("key_A") % 16 = 3  → 只锁 Stripe 3
 hash("key_B") % 16 = 7  → 只锁 Stripe 7
-→ A 和 B 操作完全并行，零竞争！
+→ A 和 B 在不同分段时通常可并行执行，竞争显著降低（仍可能受哈希偏斜、热点 key 与调度抖动影响）。
 
 对比: 单锁 HashMap
 ┌─────────────────────────────────────────┐
@@ -789,6 +798,8 @@ public:
     }
 };
 ```
+
+> NOTE：该教学实现使用固定容量数组；生产实现应显式处理“本地队列满”场景（例如回退到全局队列或拒绝策略），避免高压提交时覆盖旧任务。
 
 ### 5.2 线程池 — 三级任务获取
 

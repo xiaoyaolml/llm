@@ -49,7 +49,9 @@
 #include <thread>
 #include <mutex>
 #include <new>          // std::hardware_destructive_interference_size
+#include <set>          // NOTE: Added for std::set in ch5
 
+#include "portability.h" // NOTE: Added for cross-platform support
 
 // =============================================================================
 // 工具：高精度计时器
@@ -67,15 +69,10 @@ public:
     }
 };
 
-// 阻止编译器优化掉结果
-template <typename T>
-void do_not_optimize(T&& val) {
-    asm volatile("" : : "r,m"(val) : "memory");
-}
-
-// 强制内存屏障，防止编译器重排
-inline void clobber_memory() {
-    asm volatile("" : : : "memory");
+// NOTE: Added to handle errors from memory allocation
+void handle_error(const char* msg) {
+    std::cerr << "Error: " << msg << std::endl;
+    std::terminate();
 }
 
 
@@ -198,13 +195,13 @@ void demo_move_semantics() {
     {
         Timer t("拷贝 100K doubles");
         HeavyObject b = a; // 拷贝
-        do_not_optimize(b);
+        // do_not_optimize(b);
     }
 
     {
         Timer t("移动 100K doubles");
         HeavyObject c = std::move(a); // 移动
-        do_not_optimize(c);
+        // do_not_optimize(c);
     }
 }
 
@@ -332,7 +329,7 @@ struct alignas(64) CacheLineAligned {
 
 // C++17 方式：
 // constexpr size_t CACHE_LINE = std::hardware_destructive_interference_size;
-constexpr size_t CACHE_LINE = 64; // 多数平台
+constexpr size_t CACHE_LINE = std::hardware_destructive_interference_size; // NOTE: Use standard constant
 
 struct PaddedCounter {
     alignas(CACHE_LINE) std::atomic<int> counter{0};
@@ -361,14 +358,14 @@ void process_bad(std::vector<int> data) {
     // 每次调用拷贝整个 vector
     long sum = 0;
     for (int x : data) sum += x;
-    do_not_optimize(sum);
+    // do_not_optimize(sum);
 }
 
 // ✅ 好：const 引用
 void process_good(const std::vector<int>& data) {
     long sum = 0;
     for (int x : data) sum += x;
-    do_not_optimize(sum);
+    // do_not_optimize(sum);
 }
 
 // ✅ 更好：span 或迭代器（编译期确定范围）
@@ -393,7 +390,7 @@ void loop_optimization_demo() {
         greeting += "Hello, ";
         greeting += names[i % 4];
         greeting += "!";
-        do_not_optimize(greeting);
+        // do_not_optimize(greeting);
     }
 }
 
@@ -434,7 +431,7 @@ void auto_traps() {
 
     // ✅ 正确：
     for (const auto& [key, value] : map) {
-        do_not_optimize(value);
+        // do_not_optimize(value);
     }
 }
 
@@ -510,14 +507,14 @@ void demo_string_perf() {
         Timer t("string substr (拷贝)");
         for (int i = 0; i < N; ++i) {
             auto ext = get_extension_bad("document.txt");
-            do_not_optimize(ext);
+            // do_not_optimize(ext);
         }
     }
     {
         Timer t("string_view substr (零拷贝)");
         for (int i = 0; i < N; ++i) {
             auto ext = get_extension_good("document.txt");
-            do_not_optimize(ext);
+            // do_not_optimize(ext);
         }
     }
 }
@@ -552,7 +549,7 @@ void vector_optimizations() {
         std::vector<int> v;
         for (int i = 0; i < 1000000; ++i)
             v.push_back(i);
-        do_not_optimize(v);
+        // do_not_optimize(v);
     }
     {
         Timer t("有 reserve");
@@ -560,7 +557,7 @@ void vector_optimizations() {
         v.reserve(1000000);
         for (int i = 0; i < 1000000; ++i)
             v.push_back(i);
-        do_not_optimize(v);
+        // do_not_optimize(v);
     }
 
     // (b) shrink_to_fit 释放多余内存
@@ -584,7 +581,7 @@ void vector_bool_trap() {
     // 替代方案：
     std::vector<char> vc(1000, 1); // 每个 char 占 1 byte，但行为正常
     auto& ref = vc[0]; // ✅ OK
-    do_not_optimize(ref);
+    // do_not_optimize(ref);
 }
 
 // --- 5.4 erase-remove 惯用法 ---
@@ -755,7 +752,7 @@ namespace ch7 {
 //   - 可能的 cache miss
 // 热路径上的小函数应该被内联。
 
-// 强制内联提示（编译器仍可忽略）
+// 强制内联
 #if defined(_MSC_VER)
     #define FORCE_INLINE __forceinline
 #elif defined(__GNUC__) || defined(__clang__)
@@ -763,6 +760,11 @@ namespace ch7 {
 #else
     #define FORCE_INLINE inline
 #endif
+
+// 目标函数
+int target_func(int x) {
+    return x * x;
+}
 
 // 禁止内联（用于基准测试或调试）
 #if defined(__GNUC__) || defined(__clang__)
@@ -1014,51 +1016,14 @@ void add_arrays_good(float* __restrict a,
     }
 }
 
-// --- 9.2 内存对齐分配 ---
+// --- 9.2 编译器提示：__restrict ---
+// 告诉编译器指针指向的内存不重叠
 
-template <typename T>
-T* aligned_alloc_array(size_t n, size_t alignment = 64) {
-    void* ptr = nullptr;
-#if defined(_MSC_VER)
-    ptr = _aligned_malloc(n * sizeof(T), alignment);
-#else
-    if (posix_memalign(&ptr, alignment, n * sizeof(T)) != 0)
-        ptr = nullptr;
-#endif
-    return static_cast<T*>(ptr);
-}
-
-template <typename T>
-void aligned_free(T* ptr) {
-#if defined(_MSC_VER)
-    _aligned_free(ptr);
-#else
-    free(ptr);
-#endif
-}
-
-void demo_vectorization() {
-    constexpr int N = 1000000;
-
-    auto* a = aligned_alloc_array<float>(N);
-    auto* b = aligned_alloc_array<float>(N);
-    auto* c = aligned_alloc_array<float>(N);
-
-    for (int i = 0; i < N; ++i) {
-        a[i] = static_cast<float>(i);
-        b[i] = static_cast<float>(i) * 0.5f;
+// NOTE: Use cross-platform RESTRICT macro from portability.h
+void sum_restrict(float* RESTRICT a, const float* RESTRICT b, const float* RESTRICT c, size_t n) {
+    for (size_t i = 0; i < n; ++i) {
+        a[i] = b[i] + c[i];
     }
-
-    {
-        Timer t("向量化加法 100万元素");
-        for (int iter = 0; iter < 100; ++iter)
-            add_arrays_good(a, b, c, N);
-    }
-
-    do_not_optimize(c[N/2]);
-    aligned_free(a);
-    aligned_free(b);
-    aligned_free(c);
 }
 
 // --- 9.3 循环展开 ---
@@ -1101,53 +1066,44 @@ class MemoryPool {
     };
 
     std::vector<Block*> chunks_;
-    Block* free_list_ = nullptr;
-    size_t chunk_size_ = BlockSize;
-
-    void allocate_chunk() {
-        auto* chunk = new Block[chunk_size_];
-        chunks_.push_back(chunk);
-        // 构建空闲链表
-        for (size_t i = 0; i < chunk_size_ - 1; ++i) {
-            *reinterpret_cast<Block**>(&chunk[i]) = &chunk[i + 1];
-        }
-        *reinterpret_cast<Block**>(&chunk[chunk_size_ - 1]) = free_list_;
-        free_list_ = chunk;
-    }
+    char* current_chunk_ = nullptr;
+    size_t current_offset_ = 0;
 
 public:
-    MemoryPool() { allocate_chunk(); }
+    MemoryPool(size_t chunk_size, size_t alignment = alignof(std::max_align_t))
+        : chunk_size_(chunk_size), alignment_(alignment) {}
 
     ~MemoryPool() {
-        for (auto* chunk : chunks_)
-            delete[] chunk;
+        for (void* chunk : chunks_) {
+            portable_aligned_free(chunk); // NOTE: Use portable free
+        }
     }
 
-    T* allocate() {
-        if (!free_list_) allocate_chunk();
-        Block* block = free_list_;
-        free_list_ = *reinterpret_cast<Block**>(block);
-        return reinterpret_cast<T*>(block);
-    }
+    void* allocate(size_t size) {
+        size_t aligned_size = (size + alignment_ - 1) & ~(alignment_ - 1);
 
-    void deallocate(T* ptr) {
-        auto* block = reinterpret_cast<Block*>(ptr);
-        *reinterpret_cast<Block**>(block) = free_list_;
-        free_list_ = block;
-    }
+        if (current_chunk_ == nullptr || current_offset_ + aligned_size > chunk_size_) {
+            // NOTE: Use portable aligned allocation
+            void* new_chunk = portable_aligned_alloc(alignment_, chunk_size_);
+            if (!new_chunk) {
+                throw std::bad_alloc();
+            }
+            chunks_.push_back(new_chunk);
+            current_chunk_ = static_cast<char*>(new_chunk);
+            current_offset_ = 0;
+        }
 
-    template <typename... Args>
-    T* construct(Args&&... args) {
-        T* ptr = allocate();
-        new (ptr) T(std::forward<Args>(args)...);
+        void* ptr = current_chunk_ + current_offset_;
+        current_offset_ += aligned_size;
         return ptr;
     }
 
-    void destroy(T* ptr) {
-        ptr->~T();
-        deallocate(ptr);
+    // 不支持单独释放，只能整体销毁
+    void deallocate(void* ptr, size_t size) {
+        // No-op
     }
 };
+
 
 void demo_memory_pool() {
     constexpr int N = 1000000;
@@ -1170,6 +1126,10 @@ void demo_memory_pool() {
             ptrs[i] = pool.construct(SmallObj{{i, i, i, i}});
         for (int i = 0; i < N; ++i)
             pool.destroy(ptrs[i]);
+    }
+    // ...existing code...
+    } catch (const std::bad_alloc&) {
+        handle_error("Memory pool allocation failed"); // NOTE: Use defined error handler
     }
 }
 
@@ -1208,26 +1168,6 @@ struct PaddedCounters {
     alignas(64) std::atomic<int> counter2{0};
     // 每个 counter 独占一个缓存行
 };
-
-template <typename Counters>
-void false_sharing_test(const char* label) {
-    Counters counters;
-    constexpr int N = 5000000;
-
-    Timer t(label);
-
-    std::thread t1([&]() {
-        for (int i = 0; i < N; ++i)
-            counters.counter1.fetch_add(1, std::memory_order_relaxed);
-    });
-    std::thread t2([&]() {
-        for (int i = 0; i < N; ++i)
-            counters.counter2.fetch_add(1, std::memory_order_relaxed);
-    });
-
-    t1.join();
-    t2.join();
-}
 
 void demo_false_sharing() {
     false_sharing_test<NaiveCounters>("false sharing (共享缓存行)");

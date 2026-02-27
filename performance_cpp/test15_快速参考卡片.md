@@ -19,7 +19,7 @@ FPGA:            0.1-0.5 μs ▌
 
 ```
 传统 Socket:     1-2 Mpps
-DPDK:            10-100 Mpps    ← 最高吞吐
+DPDK:            10-100 Mpps    ← 常见高吞吐方案
 Solarflare:      10-50 Mpps
 RDMA:            100 Gbps+
 XDP:             24-40 Mpps
@@ -76,7 +76,7 @@ while (1) {
 ```bash
 # Burst Size: 32-64 (经验值)
 # Ring Size: 1024-2048 (高吞吐), 256-512 (低延迟)
-# CPU: 专用核心, 100% 轮询
+# CPU: 专用核心, 轮询场景占用通常较高
 # 内存: 1GB 大页 > 2MB 大页
 ```
 
@@ -89,7 +89,7 @@ while (1) {
 | 15 | OpenOnload 原理 | LD_PRELOAD, 用户态TCP栈 |
 | 16 | ef_vi API | 直接网卡访问, 零拷贝 |
 | 17 | Onload 加速 | Socket API 劫持 |
-| 18 | PTP 时间戳 | IEEE 1588, <100ns 精度 |
+| 18 | PTP 时间戳 | IEEE 1588，常见亚微秒级精度（依部署） |
 | 19 | TCPDirect | 用户态零拷贝TCP, `zf_*` API |
 
 **使用速查**：
@@ -105,8 +105,8 @@ ef_vi_transmit(&vi, dma_addr, len, 0);
 ```
 
 **适用场景**：
-- ✅ HFT 交易 → 延迟 300-700ns
-- ✅ 市场数据 → PTP 时间戳 <100ns
+- ✅ HFT 交易 → 常见亚微秒级延迟（依链路与负载）
+- ✅ 市场数据 → PTP 时间戳常见亚微秒级抖动
 - ✅ 交易所 → 透明加速现有系统
 
 ---
@@ -118,7 +118,7 @@ ef_vi_transmit(&vi, dma_addr, len, 0);
 | 20 | RDMA 基础 | QP, CQ, MR, WR |
 | 21 | 协议对比 | InfiniBand (1μs), RoCE v2 (1-2μs), iWARP (2-4μs) |
 | 22 | ibverbs API | `ibv_create_qp()`, `ibv_reg_mr()` |
-| 23 | 单边 WRITE/READ | 远端 CPU 零参与 |
+| 23 | 单边 WRITE/READ | 远端 CPU 参与度可显著降低 |
 | 24 | 双边 SEND/RECV | 消息语义 |
 | 25 | RDMA CM | 连接管理, 类 Socket API |
 
@@ -152,7 +152,7 @@ TCP:
 
 RDMA WRITE:
   App → RNIC  →  远端内存
-  延迟: 1-2μs, 远端 CPU 0%!
+    延迟: 常见低微秒级，远端 CPU 参与度通常更低。
 ```
 
 ---
@@ -165,7 +165,7 @@ RDMA WRITE:
 | 27 | AF_XDP | 用户态 XDP Socket |
 | 28 | io_uring | 异步 I/O 环, 批量提交 |
 | 29 | SmartNIC | NVIDIA BlueField, 网卡运行OVS |
-| 30 | FPGA | <100ns 超低延迟 |
+| 30 | FPGA | 特定场景可逼近 100ns 级延迟 |
 
 **XDP 示例**：
 ```c
@@ -260,7 +260,7 @@ echo "✅ 优化完成"
 │  └─ 吞吐优先? → 多队列 + RSS + RPS
 │
 ├─ 数据平面 (路由/NFV/包处理)
-│  ├─ 需要完全控制? → DPDK (10-100 Mpps)
+│  ├─ 需要更强控制? → DPDK (10-100 Mpps)
 │  └─ 早期过滤? → XDP/AF_XDP (20-40 Mpps)
 │
 ├─ 低延迟 (金融/HFT)
@@ -274,7 +274,7 @@ echo "✅ 优化完成"
 │  └─ 小消息? → RDMA SEND/RECV
 │
 └─ 极致性能 (证券/交易所)
-   ├─ 延迟 <100ns? → FPGA 网卡
+    ├─ 追求 100ns 级延迟? → FPGA 网卡
    └─ 定制协议? → FPGA + Verilog
 ```
 
@@ -297,7 +297,7 @@ echo "✅ 优化完成"
 
 ```
 传统 Socket: ████████ 80% (中断风暴)
-DPDK:        ██████████ 100% (1核专用轮询)
+DPDK:        ██████████ 高占用 (常见为专核轮询)
 OpenOnload:  ████████ 85% (用户态TCP栈)
 RDMA:        ██ 20% (硬件卸载)
 XDP:         ███ 30% (早期过滤)
@@ -356,7 +356,7 @@ io_uring:    ████ 40% (异步批量)
 3. **Inline 数据**: 小包 (<128B) 用 inline
 
 ### 低延迟三板斧
-1. **轮询**: 禁用中断, 100% CPU
+1. **轮询**: 禁用中断，CPU 占用通常很高
 2. **绑核**: 避免迁移, NUMA local
 3. **零拷贝**: DMA 直接映射
 

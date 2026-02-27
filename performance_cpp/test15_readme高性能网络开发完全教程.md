@@ -68,7 +68,7 @@ while (1) {
 **性能指标**：
 - 吞吐：**10-100 Mpps** (百万包每秒)
 - 延迟：**0.5-2 μs** (单向)
-- CPU：专用核心 (100% 轮询)
+- CPU：专用核心（轮询场景下占用通常较高）
 
 ---
 
@@ -81,12 +81,12 @@ while (1) {
 | 第 15 章 | Solarflare OpenOnload 原理 | 用户态 TCP 栈、LD_PRELOAD 透明加速 |
 | 第 16 章 | ef_vi 零拷贝 API | Etherfabric Virtual Interface 直接网卡访问 |
 | 第 17 章 | Onload 加速原理 | Socket API 劫持、内核旁路实现 |
-| 第 18 章 | PTP 硬件时间戳 | <100ns 精度时间同步、IEEE 1588 PTP |
+| 第 18 章 | PTP 硬件时间戳 | 亚微秒级时间同步（取决于网卡/时钟源/拓扑）、IEEE 1588 PTP |
 | 第 19 章 | Solarflare TCPDirect | 用户态零拷贝 TCP 协议栈 `zf_*` API |
 
 **典型场景**：
-- ✅ 高频交易 (HFT)：中位延迟 **300-700ns**
-- ✅ 市场数据分播：硬件时间戳 **<100ns 抖动**
+- ✅ 高频交易 (HFT)：在优化链路上常见亚微秒级中位延迟
+- ✅ 市场数据分播：硬件时间戳抖动可做到亚微秒级（依赖部署）
 - ✅ 交易所撮合引擎：内核旁路 + PTP 同步
 
 **关键特性**：
@@ -95,7 +95,7 @@ while (1) {
 onload --profile=latency ./trading_app
 
 # 延迟分布
-P50: 450ns | P99: 1.2μs | P99.9: 3.5μs
+示例延迟分布会随机型、驱动版本与流量模型变化，建议以本机实测为准。
 ```
 
 ---
@@ -109,7 +109,7 @@ P50: 450ns | P99: 1.2μs | P99.9: 3.5μs
 | 第 20 章 | RDMA 基本概念 | QP、CQ、MR、WR 核心对象模型 |
 | 第 21 章 | InfiniBand vs RoCE vs iWARP | 三大 RDMA 协议对比选型 |
 | 第 22 章 | RDMA Verbs API | `ibverbs` 编程接口、完整通信流程 |
-| 第 23 章 | RDMA 单边操作 (WRITE/READ) | 远端 CPU 零参与的内存访问 |
+| 第 23 章 | RDMA 单边操作 (WRITE/READ) | 可显著降低远端 CPU 参与度的内存访问 |
 | 第 24 章 | RDMA 双边操作 (SEND/RECV) | 消息语义通信模式 |
 | 第 25 章 | RDMA CM | 连接管理、类 Socket API 简化 |
 
@@ -122,7 +122,7 @@ P50: 450ns | P99: 1.2μs | P99.9: 3.5μs
 
 RDMA WRITE:
   App → RNIC (DMA) → 网络 → 远端内存
-  延迟: 0.7-2μs, 远端 CPU 零参与!
+   延迟: 常见可达低微秒级，远端 CPU 参与度通常显著下降。
 ```
 
 **适用场景**：
@@ -137,8 +137,8 @@ RDMA WRITE:
 |------|-----------|------------|
 | 延迟 | 10-20μs | **0.7-2μs** |
 | 带宽 | 40-60Gbps | **100-200Gbps** |
-| CPU | 30-50% | **<5%** |
-| 远端 CPU | 参与 | **零参与** |
+| CPU | 30-50% | 常见可显著降低（依 workload 而变） |
+| 远端 CPU | 参与 | 参与度通常更低 |
 
 ---
 
@@ -150,9 +150,9 @@ Linux 内核与硬件加速前沿技术：
 |------|------|----------|
 | 第 26 章 | XDP (eXpress Data Path) | eBPF 早期包过滤、DDoS 防护、50ns 延迟 |
 | 第 27 章 | AF_XDP Socket | 用户态 XDP Socket、零拷贝、20-30 Mpps |
-| 第 28 章 | io_uring 网络优化 | 异步 I/O 环、批量提交、零系统调用 |
+| 第 28 章 | io_uring 网络优化 | 异步 I/O 环、批量提交、减少系统调用 |
 | 第 29 章 | SmartNIC 与 DPU | NVIDIA BlueField、网卡上运行应用 |
-| 第 30 章 | FPGA 网卡加速 | 可编程硬件、<100ns 超低延迟 |
+| 第 30 章 | FPGA 网卡加速 | 可编程硬件、特定场景可逼近 100ns 级延迟 |
 
 **技术对比**：
 
@@ -163,13 +163,13 @@ XDP: 内核早期拦截 → eBPF 处理 → 24-40 Mpps
 AF_XDP: XDP → 用户态零拷贝 → 20-30 Mpps
         场景: 用户态包处理 (类 DPDK)
 
-io_uring: 异步 I/O 环 → 批量提交 → 2-3x epoll
+io_uring: 异步 I/O 环 → 批量提交 → 某些场景下吞吐可明显优于 epoll
           场景: 现代高并发服务
 
 SmartNIC: ARM/FPGA @ 网卡 → OVS/防火墙硬件卸载
           场景: 云网络、存储加速
 
-FPGA: Verilog 定制逻辑 → <100ns 延迟
+FPGA: Verilog 定制逻辑 → 特定链路可达 100ns 级延迟
       场景: HFT、协议硬件实现
 ```
 

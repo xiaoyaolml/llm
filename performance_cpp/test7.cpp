@@ -522,16 +522,21 @@ public:
 
     std::optional<AcceptResult> accept() {
         SocketAddress client_addr;
-        socklen_t addr_len = sizeof(sockaddr_storage);
+        // NOTE: 必须回填实际地址长度，否则 to_string/port 可能失真。
+        *client_addr.size_ptr() = sizeof(sockaddr_storage);
 
         socket_t client_fd = ::accept(listen_socket_.fd(),
                                        client_addr.data(),
-                                       &addr_len);
+                                       client_addr.size_ptr());
         if (client_fd == INVALID_SOCK) {
-            if (get_last_error() == EWOULDBLOCK ||
-                get_last_error() == EAGAIN)
+            int err = get_last_error();
+#ifdef _WIN32
+            if (err == WSAEWOULDBLOCK)
+#else
+            if (err == EWOULDBLOCK || err == EAGAIN)
+#endif
                 return std::nullopt; // 非阻塞模式下无连接
-            throw std::system_error(get_last_error(),
+            throw std::system_error(err,
                 std::system_category(), "accept failed");
         }
 
@@ -582,9 +587,10 @@ public:
         RecvResult result;
         result.data.resize(max_len);
 
-        socklen_t addr_len = sizeof(sockaddr_storage);
+        // NOTE: 让 recvfrom 直接写入 sender 的长度字段，保证地址可正确格式化。
+        *result.sender.size_ptr() = sizeof(sockaddr_storage);
         int n = ::recvfrom(socket_.fd(), result.data.data(), max_len, 0,
-                           result.sender.data(), &addr_len);
+                           result.sender.data(), result.sender.size_ptr());
         if (n <= 0) return std::nullopt;
         result.data.resize(n);
         return result;
@@ -1001,6 +1007,7 @@ private:
         }
 
         // Body (简化：读取剩余数据)
+        // NOTE: 教学简化实现。生产场景应按 Content-Length/chunked 严格读取完整 body。
         if (buf.readable_bytes() > 0) {
             req.body = std::string(buf.read_ptr(), buf.readable_bytes());
         }
@@ -1343,18 +1350,31 @@ bool connect_with_timeout(Socket& sock, const SocketAddress& addr,
     // 设为非阻塞
     sock.set_nonblocking(true);
 
+    auto restore_blocking = [&]() noexcept {
+        try {
+            sock.set_nonblocking(false);
+        } catch (...) {
+        }
+    };
+
     int ret = ::connect(sock.fd(), addr.data(), static_cast<int>(addr.size()));
 
     if (ret == 0) {
-        sock.set_nonblocking(false);
+        restore_blocking();
         return true; // 立即成功
     }
 
     // 检查是否 "正在进行中"
 #ifdef _WIN32
-    if (get_last_error() != WSAEWOULDBLOCK) return false;
+    if (get_last_error() != WSAEWOULDBLOCK) {
+        restore_blocking();
+        return false;
+    }
 #else
-    if (errno != EINPROGRESS) return false;
+    if (errno != EINPROGRESS) {
+        restore_blocking();
+        return false;
+    }
 #endif
 
     // 用 select 等待可写（连接完成或失败）
@@ -1363,15 +1383,21 @@ bool connect_with_timeout(Socket& sock, const SocketAddress& addr,
     ss.add_except(sock.fd());
 
     int ready = ss.wait(timeout_ms);
-    if (ready <= 0) return false; // 超时或错误
+    if (ready <= 0) {
+        restore_blocking();
+        return false; // 超时或错误
+    }
 
     // 检查连接结果
     int err = 0;
     socklen_t len = sizeof(err);
-    getsockopt(sock.fd(), SOL_SOCKET, SO_ERROR,
-               reinterpret_cast<char*>(&err), &len);
+    if (getsockopt(sock.fd(), SOL_SOCKET, SO_ERROR,
+                   reinterpret_cast<char*>(&err), &len) != 0) {
+        restore_blocking();
+        return false;
+    }
 
-    sock.set_nonblocking(false);
+    restore_blocking();
     return err == 0;
 }
 

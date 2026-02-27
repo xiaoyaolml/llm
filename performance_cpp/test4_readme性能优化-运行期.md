@@ -21,6 +21,16 @@ g++ -std=c++17 -O3 -march=native -flto -lpthread -o test4 test4.cpp
 cl /std:c++17 /O2 /W4 /EHsc test4.cpp
 ```
 
+> **NOTE (可移植性)**:
+> 原始代码包含一些 GCC/Clang 特有的扩展（如 `asm volatile`, `__restrict`）和 POSIX 函数（如 `posix_memalign`）。为了实现跨平台兼容（特别是支持 MSVC），我们引入了一个新的头文件 `portability.h`。
+>
+> 这个文件使用预处理器宏来为不同编译器提供等效实现，例如：
+> *   `do_not_optimize`: 在 MSVC 下使用 `_ReadWriteBarrier`。
+> *   `RESTRICT`: 在 MSVC 下映射到 `__declspec(restrict)`。
+> *   `portable_aligned_alloc`: 在 MSVC 下使用 `_aligned_malloc`，在其他平台使用 `aligned_alloc`。
+>
+> 这使得主代码 `test4.cpp` 保持整洁，同时能够在所有主流编译器上编译通过。
+
 ---
 
 ## 教程目录
@@ -35,7 +45,7 @@ cl /std:c++17 /O2 /W4 /EHsc test4.cpp
 | 6 | **智能指针的性能考量** | unique_ptr 零开销、shared_ptr 开销分析 |
 | 7 | **内联与函数调用开销** | FORCE_INLINE、fn_ptr vs std::function vs 模板 lambda |
 | 8 | **分支预测与无分支编程** | 有序 vs 随机数据、无分支算术、[[likely]] |
-| 9 | **SIMD 风格与自动向量化** | __restrict、对齐分配、循环展开 |
+| 9 | **SIMD 风格与自动向量化** | `RESTRICT` 关键字、对齐分配、循环展开 |
 | 10 | **内存分配优化** | MemoryPool 内存池、栈上分配策略 |
 | 11 | **多线程与无锁编程基础** | false sharing、SpinLock、无锁栈 CAS |
 | 12 | **编译器优化提示** | __builtin_expect、PGO 流程、编译选项速查 |
@@ -103,6 +113,7 @@ void do_not_optimize(T&& val) {
 ```
 
 > **为什么需要 `do_not_optimize`？** — `-O2` 下编译器会消除没有副作用的计算。如果不用它，你测的是空循环而非实际算法。
+> **NOTE**: 此函数现已通过 `portability.h` 实现跨平台兼容。
 
 ---
 
@@ -278,6 +289,8 @@ struct PaddedCounters {
 };
 ```
 
+> **NOTE**: 代码中已将硬编码的 `64` 字节替换为 C++17 标准常量 `std::hardware_destructive_interference_size`，以获得更好的可移植性。
+
 ### 深入扩展：缓存优化技术总览
 
 | 技术 | 原理 | 适用场景 |
@@ -420,7 +433,7 @@ result += file;
 | 短临时字符串 | 利用 SSO |
 | 循环中反复构建 | `clear()` + `+=`（复用缓冲区） |
 | 大量拼接 | `reserve()` + `append` / `+=` |
-| 格式化输出 | `fmt::format` (C++20) 或 `snprintf` |
+| 格式化输出 | C++20 `std::format` 或 `fmtlib` |
 | 编译期字符串 | `constexpr string_view` |
 
 ---

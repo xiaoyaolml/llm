@@ -95,6 +95,7 @@
 #include <chrono>
 #include <thread>
 #include <mutex>
+#include <condition_variable>
 #include <atomic>
 #include <cassert>
 #include <cstdint>
@@ -111,6 +112,7 @@
   #include <x86intrin.h>
 #elif defined(_WIN32)
   #include <intrin.h>
+    #include <malloc.h>
   #include <windows.h>
 #endif
 
@@ -153,6 +155,23 @@ static void print_header(const char* title) {
 }
 static void print_section(const char* title) {
     std::cout << "  ── " << title << " ──\n";
+}
+
+static void* aligned_alloc_portable(size_t alignment, size_t size) {
+#if defined(_WIN32)
+    return _aligned_malloc(size, alignment);
+#else
+    const size_t adjusted = (size + alignment - 1) & ~(alignment - 1);
+    return std::aligned_alloc(alignment, adjusted);
+#endif
+}
+
+static void aligned_free_portable(void* ptr) {
+#if defined(_WIN32)
+    _aligned_free(ptr);
+#else
+    std::free(ptr);
+#endif
 }
 
 class Timer {
@@ -731,8 +750,8 @@ void demo() {
   };
   std::vector<int, HugePageAllocator<int>> data(1'000'000);
 
-  效果: 对于大数据集 (>6MB), 大页可减少 TLB miss 90%+
-        延迟降低 10%-30%
+  效果: 对于大数据集 (>6MB), 大页常可显著降低 TLB miss
+      具体收益依赖负载与系统配置，建议以目标环境实测
 )";
 }
 
@@ -771,7 +790,7 @@ public:
         // 对齐到缓存行
         slot_size_ = (slot_size_ + CACHE_LINE - 1) & ~(CACHE_LINE - 1);
 
-        pool_ = static_cast<char*>(std::aligned_alloc(CACHE_LINE, slot_size_ * MaxSize));
+        pool_ = static_cast<char*>(aligned_alloc_portable(CACHE_LINE, slot_size_ * MaxSize));
         if (!pool_) throw std::bad_alloc();
 
         // 构建 freelist
@@ -782,7 +801,7 @@ public:
         }
     }
 
-    ~ObjectPool() { std::free(pool_); }
+    ~ObjectPool() { aligned_free_portable(pool_); }
 
     template<typename... Args>
     T* allocate(Args&&... args) {
@@ -882,10 +901,10 @@ class Arena {
 
 public:
     Arena(size_t cap) : capacity_(cap) {
-        base_ = static_cast<char*>(std::aligned_alloc(CACHE_LINE, cap));
+        base_ = static_cast<char*>(aligned_alloc_portable(CACHE_LINE, cap));
         if (!base_) throw std::bad_alloc();
     }
-    ~Arena() { std::free(base_); }
+    ~Arena() { aligned_free_portable(base_); }
 
     // O(1) 分配 — 只需移动指针
     void* allocate(size_t size, size_t align = alignof(std::max_align_t)) {
@@ -1120,7 +1139,7 @@ void demo() {
   nohz_full:  禁用定时中断 (tick) → 消除 ~4μs 的定时器中断
   rcu_nocbs:  RCU 回调不在这些核心上执行
 
-  效果: 被隔离的 CPU 完全由你的应用独占 → 延迟最稳定
+    效果: 被隔离 CPU 可显著减少调度干扰，通常有助于延迟稳定
 )";
 }
 
@@ -1904,7 +1923,8 @@ class LockFreePool {
 public:
     LockFreePool() {
         pool_memory_ = static_cast<char*>(
-            std::aligned_alloc(CACHE_LINE, sizeof(Node) * PoolSize));
+            aligned_alloc_portable(CACHE_LINE, sizeof(Node) * PoolSize));
+        if (!pool_memory_) throw std::bad_alloc();
 
         // 构建 freelist
         Node* nodes = reinterpret_cast<Node*>(pool_memory_);
@@ -1915,7 +1935,7 @@ public:
         free_head_.store(nodes, std::memory_order_relaxed);
     }
 
-    ~LockFreePool() { std::free(pool_memory_); }
+    ~LockFreePool() { aligned_free_portable(pool_memory_); }
 
     template<typename... Args>
     T* allocate(Args&&... args) {
@@ -2037,7 +2057,7 @@ void demo() {
   ═══ 第21章: TCP 低延迟调优 ═══
 
   关键 socket 选项:
-    TCP_NODELAY = 1          // 禁用 Nagle 算法 (必须!)
+    TCP_NODELAY = 1          // 常见低延迟配置: 禁用 Nagle 算法
     TCP_QUICKACK = 1         // 禁用延迟 ACK
     SO_RCVBUF / SO_SNDBUF    // 适当缩小缓冲区 → 减少排队延迟
     SO_BUSY_POLL = 50        // 内核忙轮询 50μs
@@ -2357,7 +2377,8 @@ void demo() {
     - 代码布局 (热路径连续, 冷路径分离)
     - 循环优化 (基于真实迭代次数)
 
-  效果: 通常提速 10-30%, 低延迟场景可达 40%
+  效果: 在贴近生产负载的 profile 下常有可观收益；
+      具体提升幅度依赖代码形态与数据分布
 
   MSVC:
     cl /O2 /GL /GENPROFILE app.cpp        # 插桩

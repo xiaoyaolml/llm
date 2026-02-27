@@ -1289,7 +1289,8 @@ void demo() {
         }
     };
 
-  性能: std::format 通常比 iostream 快 2-5x, 与 printf 相当
+    性能: std::format 在复杂格式化场景常优于 iostream；
+                具体收益依赖库实现/编译器/负载，建议以目标平台实测
 )";
 
     // C++17 模拟简单格式化
@@ -1725,7 +1726,8 @@ void demo() {
     sizeof(虚函数类): sizeof(数据) + 8 (vptr)
     sizeof(CRTP类):   sizeof(数据)
 
-    性能差距: CRTP 快 2-10x (取决于函数复杂度和内联程度)
+    性能提示: 在可内联且短函数场景下 CRTP 常见更快
+              具体收益依赖代码形态/编译器/数据访问模式，需实测
 )";
 }
 
@@ -2319,9 +2321,12 @@ public:
     }
 
     constexpr const V& at(const K& key) const {
-        const V* p = find(key);
-        // constexpr 中不能 throw，但可以触发编译错误
-        return *p;
+        if (const V* p = find(key)) {
+            return *p;
+        }
+        // NOTE: 避免空指针解引用；示例代码默认调用方传入有效 key。
+        assert(false && "ConstexprMap::at(): key not found");
+        return data_[0].second;
     }
 };
 
@@ -2884,6 +2889,9 @@ void demo() {
 
 namespace ch34 {
 
+// 复用前文第5章定义的 Overloaded
+using ch5::Overloaded;
+
 void demo() {
     print_section("Lambda 高级用法 (C++14→20→23)");
 
@@ -2956,9 +2964,6 @@ void demo() {
     // 可转换为普通函数指针, 无捕获开销
 )";
 }
-
-// 5. variant 的 Overloaded 需要引用前面定义的
-using ch5::Overloaded;
 
 } // namespace ch34
 

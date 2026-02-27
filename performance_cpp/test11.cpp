@@ -1299,6 +1299,17 @@ class MSQueue {
 
     alignas(CACHE_LINE) std::atomic<Node*> head_;
     alignas(CACHE_LINE) std::atomic<Node*> tail_;
+    std::atomic<Node*> retired_{nullptr};
+
+    void retire_node(Node* node) {
+        Node* expected = retired_.load(std::memory_order_relaxed);
+        do {
+            node->next.store(expected, std::memory_order_relaxed);
+        } while (!retired_.compare_exchange_weak(
+            expected, node,
+            std::memory_order_release,
+            std::memory_order_relaxed));
+    }
 
 public:
     MSQueue() {
@@ -1311,6 +1322,13 @@ public:
         T val;
         while (dequeue(val)) {}
         delete head_.load();
+
+        Node* retired = retired_.load(std::memory_order_acquire);
+        while (retired) {
+            Node* next = retired->next.load(std::memory_order_relaxed);
+            delete retired;
+            retired = next;
+        }
     }
 
     void enqueue(const T& val) {
@@ -1365,7 +1383,9 @@ public:
                                 head, next,
                                 std::memory_order_acq_rel,
                                 std::memory_order_acquire)) {
-                        delete head; // 删除旧 dummy
+                        // NOTE: 并发场景下立即 delete 可能与其他线程仍在读取旧 head 发生冲突。
+                        // 这里改为延迟回收，避免悬垂指针；教学演示在析构阶段统一释放。
+                        retire_node(head);
                         return true;
                     }
                 }

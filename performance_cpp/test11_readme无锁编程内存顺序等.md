@@ -432,6 +432,8 @@ while (!head.compare_exchange_weak(old_head, new_head)) {
 // CAS 同时比较 ptr + tag, 防止 ABA
 ```
 
+> NOTE：Tagged Pointer 的位打包依赖地址空间与对齐假设。跨平台实现时应优先采用可验证布局（例如双宽 CAS 或显式结构体计数），避免固定 48/16 位方案带来的可移植性风险。
+
 ### 4.4 ABA 解决方案对比
 
 | 方案 | 原理 | 优点 | 缺点 |
@@ -622,7 +624,9 @@ for (int i = 0; i < 10'000'000; ++i)
 // x86: LOCK XADD (同样! x86 的 LOCK 指令本身就是 full barrier)
 ```
 
-> **x86 的"秘密"**: 在 x86 上，`LOCK` 前缀指令（用于所有 RMW）本身就提供了 full barrier 语义。因此 `relaxed` 和 `seq_cst` 的 RMW 在 x86 上**性能几乎相同**。差异主要体现在 ARM 等弱序架构上。
+> **x86 的"秘密"**: 在 x86 上，`LOCK` 前缀的 RMW 指令通常具备很强的顺序约束，因此 `relaxed` 和 `seq_cst` 的 RMW 在很多场景下性能接近。是否几乎相同仍取决于编译器指令选择、微架构和负载特征。
+
+> NOTE：不要把“接近”理解为“永远相同”，应以目标机器的反汇编与基准结果为准。
 
 ### 6.4 深入扩展
 
@@ -1223,12 +1227,14 @@ enqueue(C) 分两步:
             T val = *next->data;
             if (head_.compare_exchange_weak(head, next,
                     std::memory_order_acq_rel)) {
-                delete head;  // 删除旧 dummy
+                retire_node(head);  // 延迟回收, 避免并发读取下的悬垂指针
                 return val;
             }
         }
     }
 ```
+
+> NOTE：MSQueue 在并发出队时若“立即 delete 旧 head”可能触发并发读取冲突。生产实现通常搭配 Hazard Pointer/EBR 等安全回收机制。
 
 ### 14.4 深入扩展
 

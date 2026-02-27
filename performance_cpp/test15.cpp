@@ -257,7 +257,7 @@ void demo() {
   ═══ DPDK (Data Plane Development Kit) ═══
 
   核心特性:
-    ✓ 用户态 PMD (Poll Mode Driver) — 完全跳过内核
+    ✓ 用户态 PMD (Poll Mode Driver) — 显著减少内核数据路径开销
     ✓ 大页内存 (Huge Pages) — 减少 TLB miss
     ✓ 无锁环形队列 — 高效跨核通信
     ✓ CPU 亲和性 — 绑核避免迁移
@@ -271,8 +271,8 @@ void demo() {
     ✓ 透明加速 — 无需修改应用代码 (LD_PRELOAD)
     ✓ Kernel bypass + ef_vi — 直接访问网卡
     ✓ TCPDirect — 用户态 TCP 栈
-    ✓ 硬件时间戳 — PTP 同步 <100ns 抖动
-    ✓ 低延迟 — 中位延迟 ~300-700ns
+    ✓ 硬件时间戳 — 在合适硬件/配置下可达亚微秒级抖动
+    ✓ 低延迟 — 常见可达亚微秒量级
 
   典型应用: HFT/交易所/市场数据
 
@@ -280,8 +280,8 @@ void demo() {
 
   核心特性:
     ✓ 零拷贝 — 直接 DMA 到用户内存
-    ✓ 单边操作 — 无需远端 CPU 参与
-    ✓ 硬件卸载 — 协议完全在网卡实现
+    ✓ 单边操作 — 可显著降低远端 CPU 参与度
+    ✓ 硬件卸载 — 协议处理可大幅下沉到网卡侧
     ✓ 可靠传输 — RC (Reliable Connection)
     ✓ RDMA CM — 连接建立管理
 
@@ -289,7 +289,7 @@ void demo() {
 
   ═══ 选择指南 ═══
 
-  DPDK: 需要完全控制 + 高吞吐 → 数据平面
+  DPDK: 需要更强控制 + 高吞吐 → 数据平面
   Solarflare: 最低延迟 + TCP → 金融交易
   RDMA: 跨节点高带宽 + 零拷贝 → AI/HPC
   io_uring: 通用优化 + 兼容性好 → 现代应用
@@ -392,7 +392,7 @@ void demo() {
                              │ (注册MR) │
                              └──────────┘
 
-  完全硬件处理, 0 CPU 拷贝, 0 内核参与
+  主要由硬件 DMA 路径处理, CPU 拷贝与内核参与可显著减少
 
   ═══ 零拷贝限制 ═══
 
@@ -561,7 +561,7 @@ void demo() {
     ✓ 高吞吐 (无上下文切换)
 
   缺点:
-    ❌ CPU 占用 100% (即使无流量)
+    ❌ CPU 占用通常很高 (低流量时也可能接近满核)
     ❌ 功耗高
     ❌ 需要专用 CPU 核心
 
@@ -2000,7 +2000,7 @@ void demo() {
     std::cout << R"(
   ═══ PTP (Precision Time Protocol) ═══
 
-  硬件打时间戳, 精度 <100ns
+  硬件打时间戳, 在合适网卡与时钟同步条件下可达亚微秒到百纳秒级精度
 
   Solarflare:
     int flag = SO_TIMESTAMPING;
@@ -2025,7 +2025,7 @@ void demo() {
   用户态零拷贝 TCP 栈
 
   特点:
-    - 完全在用户态
+    - 主要在用户态
     - 零拷贝 send/recv
     - 支持 epoll 语义
 
@@ -2335,7 +2335,7 @@ void demo() {
     std::cout << R"(
   ═══ io_uring (Linux 5.1+) ═══
 
-  异步 I/O 环, 零系统调用
+  异步 I/O 环, 可显著减少系统调用次数
 
   初始化:
     struct io_uring ring;
@@ -2356,7 +2356,7 @@ void demo() {
     - 零拷贝 (注册 buffer)
     - kernel polling (SQPOLL)
 
-  性能: 2-3x 吞吐于 epoll
+  性能: 在部分 workload 下吞吐可明显高于 epoll
 )";
 }
 } // namespace ch28
@@ -2396,7 +2396,7 @@ void demo() {
 
   可编程硬件加速
     - Verilog/VHDL 定制逻辑
-    - 超低延迟 (<100ns)
+    - 超低延迟 (特定场景可逼近 100ns 级)
 
   厂商:
     Xilinx Alveo

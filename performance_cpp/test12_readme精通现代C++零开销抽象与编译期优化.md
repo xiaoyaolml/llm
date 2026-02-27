@@ -514,8 +514,10 @@ static_assert(starts_with_hello("hello world"));
 ```
 string::substr      ×100000: ~15ms  （每次堆分配 + 拷贝）
 string_view::substr ×100000: ~0.5ms （零拷贝，指针偏移）
-→ 约 30 倍性能差距
+→ 常见可见显著差距（具体倍数依赖分配器/实现/平台与数据规模）
 ```
+
+> **NOTE（补充说明）**：`string_view::substr` 的常量时间优势主要来自“只做视图切片不拷贝”；但端到端性能仍受缓存命中、调用上下文与后续处理逻辑影响，不应机械套用固定倍数。
 
 ### 6.3 注意事项
 
@@ -774,7 +776,7 @@ partial_ordering:  可能不可比较         (如 NaN)
 2. **与标准库容器交互**：`std::set` / `std::map` 自动使用 <=> 生成的 `operator<`
 3. **异构比较**：`strong_ordering operator<=>(int) const` 支持不同类型间比较
 4. **`= default` 的语义**：逐成员按声明顺序比较——与手写 `std::tie` 等价
-5. **性能**：`default <=>` 编译后完全等同于手写连续比较——零开销
+5. **性能**：`default <=>` 在常见简单成员比较场景常可优化到接近手写连续比较；建议通过反汇编与基准在目标工具链验证
 
 ---
 
@@ -928,7 +930,7 @@ struct std::formatter<Point> {
 2. **`std::format_to` + 预分配缓冲区**：避免内部分配，适合高性能路径
 3. **`std::vformat` 动态格式串**：运行时格式串（失去编译期检查）
 4. **日志库集成**：spdlog/fmtlib 已采用相同语法——迁移到 `std::format` 几乎零成本
-5. **性能**：通常比 iostream 快 2-5x，与 `printf` 相当或更快
+5. **性能**：在复杂格式化场景中常优于 iostream；具体收益依赖标准库实现、编译器与工作负载
 
 ---
 
@@ -1521,6 +1523,8 @@ constexpr ConstexprMap http_status(std::array{
 constexpr auto s200 = http_status.at(200); // "OK" — 编译期查询
 static_assert(std::string_view(s200) == "OK");
 ```
+
+> **NOTE（补充说明）**：`at()` 语义应明确“key 必须存在”。工程实践中建议优先 `find()` 判空（或返回 `optional`），避免把“未命中 key”留给未定义行为或隐式前置条件。
 
 ### 深入扩展
 

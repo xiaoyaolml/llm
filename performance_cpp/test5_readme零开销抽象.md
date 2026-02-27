@@ -117,7 +117,10 @@ cl /std:c++17 /O2 /W4 /EHsc test5.cpp
 | Rust | 单态化 + trait object | 单态化零开销；dyn trait 有 vtable |
 | Python | 鸭子类型 | 全运行期动态查找 |
 
-> C++ 和 Rust 是**仅有的两门**在泛型上实现真正零开销的系统级语言。
+> C++ 和 Rust 是主流系统语言里最典型的零开销泛型代表。
+>
+> **NOTE (修正补充)**:
+> “仅有的两门”这一表述过于绝对。更严谨的说法是：C++/Rust 在主流工程实践中最广泛地将“单态化 + 零运行时抽象开销”作为核心范式。
 
 ---
 
@@ -219,7 +222,10 @@ for (int x : data) sum += x;
 long sum = std::accumulate(data.begin(), data.end(), 0L);
 ```
 
-> **四者在 `-O2` 下生成完全相同的机器码。** 这就是零开销迭代器抽象。
+> **四者在很多常见场景下会收敛到等价机器码。** 这体现了迭代器抽象的零开销目标。
+>
+> **NOTE (修正补充)**:
+> 是否“完全相同”受编译器版本、目标架构、是否开启调试符号/异常、以及循环体复杂度影响。工程中应以反汇编与基准实测为准，而不是绝对化结论。
 
 ### 3.2 自定义 ArrayView：零开销容器视图
 
@@ -375,8 +381,12 @@ static_assert(sizeof(Meters) == sizeof(double), "zero overhead");
 
 ```cpp
 // optional<T> = T + bool，无堆分配
-static_assert(sizeof(std::optional<int>) == sizeof(int) + sizeof(int),
-              "optional<int> = 8 bytes");
+static_assert(sizeof(std::optional<int>) >= sizeof(int) + 1,
+              "optional<int> stores value + engaged flag");
+
+// NOTE:
+// optional 的精确大小不是标准保证项，会因 ABI 与对齐策略变化。
+// 教程中建议避免写死 8 字节结论。
 ```
 
 ### 7.2 替代空指针
@@ -469,6 +479,10 @@ double area(const Shape& s) {
 ```
 
 > **variant 快 2 倍的原因**：数据连续存储在 vector 中（缓存行命中率高），而虚函数方案的每个对象通过 `unique_ptr` 堆分配（指针追踪，缓存不友好）。
+>
+> **NOTE (补充)**:
+> 该结论成立的前提是当前基准构造方式（`variant` 连续存储 vs `virtual` 堆分配对象图）。
+> 若虚函数方案同样采用对象池/连续布局，差距可能明显缩小。
 
 ### 深入扩展：variant vs 虚函数选型
 
@@ -1009,7 +1023,12 @@ State on_event(const Starting&, const Initialized&) { return Running{0.0}; }
 State on_event(const Running&, const SetSpeed& e)   { return Running{e.speed}; }
 State on_event(const Running&, const PowerOff&)     { return Stopping{}; }
 State on_event(const Stopping&, const Initialized&) { return Off{}; }
-State on_event(const auto&, const Fault& f)         { return Error_{f.message}; }
+template <typename S>
+State on_event(const S&, const Fault& f)            { return Error_{f.message}; }
+
+// NOTE:
+// `const auto&` 形参属于 C++20 的简写模板语法。
+// 若教程目标包含严格 C++17，请使用显式模板参数写法（如上）。
 State on_event(const Error_&, const PowerOff&)      { return Off{}; }
 ```
 
@@ -1247,8 +1266,11 @@ clang++ -std=c++17 -O2 -S -emit-llvm -o test5.ll test5.cpp
 
 ## 核心理念
 
-> **零开销抽象不是"低开销抽象"。** 是**真正的零**——编译后的汇编与手写 C 代码一模一样。
+> **零开销抽象不是“低开销抽象”。** 目标是在可优化场景下逼近“与手写低层代码等价”的机器码。
 >
-> 这是 C++ 区别于所有其他高级语言的**根本特征**。Java、Python、Go 的抽象总有运行期代价。C++ 的抽象可以做到编译后完全消失，只留下与手写代码等价的机器指令。
+> 这是 C++ 的核心优势之一：很多抽象可在编译后被消解。相比之下，其他语言常在运行期保留更多抽象信息。
+>
+> **NOTE (修正补充)**:
+> 这里不宜做“所有语言一概而论”的绝对结论。比如 JVM/JIT 在热点路径上也可能将部分抽象优化掉，但其模型与 C++ 的静态单态化路径不同。
 >
 > 验证方法：在 [godbolt.org](https://godbolt.org/) 对比两个版本的汇编输出。

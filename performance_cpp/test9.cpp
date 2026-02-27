@@ -67,6 +67,11 @@
 #include <cassert>
 #include <cstring>
 #include <iomanip>
+#if defined(_MSC_VER)
+#include <intrin.h>
+#elif defined(__x86_64__) || defined(__i386__)
+#include <immintrin.h>
+#endif
 
 using namespace std::chrono_literals;
 
@@ -571,7 +576,7 @@ namespace ch4 {
 template <typename K, typename V, size_t NUM_STRIPES = 16>
 class ConcurrentHashMap {
     struct Bucket {
-        std::shared_mutex mutex;
+        mutable std::shared_mutex mutex;
         std::unordered_map<K, V> data;
     };
 
@@ -591,7 +596,7 @@ public:
 
     // 查找
     std::optional<V> get(const K& key) const {
-        auto& bucket = buckets_[stripe(key)];
+        const auto& bucket = buckets_[stripe(key)];
         std::shared_lock lock(bucket.mutex);
         auto it = bucket.data.find(key);
         if (it != bucket.data.end()) return it->second;
@@ -625,7 +630,7 @@ public:
 
     // 遍历（快照式，不保证一致性）
     void for_each(std::function<void(const K&, const V&)> fn) const {
-        for (auto& bucket : buckets_) {
+        for (const auto& bucket : buckets_) {
             std::shared_lock lock(bucket.mutex);
             for (auto& [k, v] : bucket.data) fn(k, v);
         }
@@ -633,7 +638,7 @@ public:
 
     size_t size() const {
         size_t total = 0;
-        for (auto& bucket : buckets_) {
+        for (const auto& bucket : buckets_) {
             std::shared_lock lock(bucket.mutex);
             total += bucket.data.size();
         }
@@ -709,11 +714,16 @@ class WorkStealingDeque {
 
 public:
     // 所有者调用：添加任务到底部
-    void push(std::function<void()> task) {
+    bool push(std::function<void()> task) {
         int b = bottom_.load(std::memory_order_relaxed);
+        int t = top_.load(std::memory_order_acquire);
+        if (b - t >= BUFFER_SIZE) {
+            return false;
+        }
         buffer_[b % BUFFER_SIZE] = std::move(task);
         std::atomic_thread_fence(std::memory_order_release);
         bottom_.store(b + 1, std::memory_order_relaxed);
+        return true;
     }
 
     // 所有者调用：从底部取任务
@@ -780,8 +790,8 @@ class WorkStealingPool {
     static thread_local int thread_index_;
 
 public:
-    explicit WorkStealingPool(int num_threads = std::thread::hardware_concurrency())
-        : num_threads_(num_threads) {
+    explicit WorkStealingPool(int num_threads = static_cast<int>(std::thread::hardware_concurrency()))
+        : num_threads_(num_threads > 0 ? num_threads : 1) {
         for (int i = 0; i < num_threads_; ++i)
             queues_.push_back(std::make_unique<WorkStealingDeque>());
 
@@ -810,7 +820,10 @@ public:
 
         // 如果当前在工作线程中，直接放入本地队列
         if (thread_index_ >= 0 && thread_index_ < num_threads_) {
-            queues_[thread_index_]->push(std::move(wrapper));
+            if (!queues_[thread_index_]->push(std::move(wrapper))) {
+                std::lock_guard lock(global_mutex_);
+                global_queue_.push([task]() { (*task)(); });
+            }
         } else {
             std::lock_guard lock(global_mutex_);
             global_queue_.push(std::move(wrapper));
