@@ -862,7 +862,7 @@ function showCopied() {{
 # ============================================================
 def main():
     input_file = sys.argv[1] if len(sys.argv) > 1 else 'input.md'
-    output_file = sys.argv[2] if len(sys.argv) > 2 else 'output_rendered.html'
+    output_file = sys.argv[2] if len(sys.argv) > 2 else 'output.html'
 
     with open(input_file, 'r', encoding='utf-8') as f:
         md_text = f.read()
