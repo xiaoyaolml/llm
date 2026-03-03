@@ -1,6 +1,10 @@
 # llm
 
 + llm notes
-+ AI generated contents
++ AI gems
++ algorithm
++ data structure
++ design patterns
 + C++
 + Python
++ Markdown
