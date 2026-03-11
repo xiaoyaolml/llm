@@ -26,16 +26,16 @@
 
 ## 1.1 你可能有这些疑问
 
-> **Q: 我完全没有编程基础，能学 LeetCode 吗？**  
+> **Q: 我完全没有编程基础，能学 LeetCode 吗？**
 > A: 可以！但需要先学 C++ 基础语法（2-4 周），本路线会告诉你需要什么基础。
 
-> **Q: 刷多少题才够？**  
+> **Q: 刷多少题才够？**
 > A: **质量 > 数量**。200 题精刷 > 500 题水过。理解一道题的多种解法比做十道新题更重要。
 
-> **Q: 看不懂题解怎么办？**  
+> **Q: 看不懂题解怎么办？**
 > A: 正常！先看对应专题的知识文档理解原理，再看题解。每个专题都有从原理到代码的完整讲解。
 
-> **Q: 多久能看到效果？**  
+> **Q: 多久能看到效果？**
 > A: 坚持 2 周你会觉得没那么难了；1 个月后能独立解 Easy；3 个月后能解大部分 Medium。
 
 ## 1.2 心态准备
@@ -62,31 +62,31 @@
 
 ## 2.1 必须掌握（开始刷题前）
 
-| 知识点 | 你需要能做到 | 参考学习时间 |
-|--------|-------------|-------------|
-| 变量与数据类型 | 知道 `int`, `long long`, `double`, `char`, `string`, `bool` | 1 天 |
-| 数组 | 声明、遍历、修改 | 1 天 |
-| 条件语句 | `if/else`, `switch` | 1 天 |
-| 循环 | `for`, `while`, `break`, `continue` | 1 天 |
-| 函数 | 定义、参数、返回值 | 1 天 |
-| 指针与引用 | 知道 `*`, `&`, `->` 的含义 | 2 天 |
-| `vector` | `push_back`, `size`, `[]`, 遍历 | 1 天 |
-| `string` | 拼接、遍历、`substr`, `find` | 1 天 |
-| `sort` | `sort(v.begin(), v.end())` | 半天 |
-| 基本 I/O | `cin`, `cout` | 半天 |
+| 知识点         | 你需要能做到                                                             | 参考学习时间 |
+| -------------- | ------------------------------------------------------------------------ | ------------ |
+| 基本 I/O       | `cin`, `cout`                                                        | 半天         |
+| 变量与数据类型 | 知道 `int`, `long long`, `double`, `bool`, `char`, `string` | 1 天         |
+| 数组           | 声明、遍历、修改                                                         | 1 天         |
+| 分支(条件)语句 | `if/else`, `switch/case`                                             | 1 天         |
+| 循环           | `for`, `while`, `break`, `continue`                              | 1 天         |
+| 函数           | 定义、参数、返回值                                                       | 1 天         |
+| 指针与引用     | 知道 `*`, `&`, `->` 的含义                                         | 2 天         |
+| `vector`     | `push_back`, `size`, `[]`, 遍历                                    | 1 天         |
+| `string`     | 拼接、遍历、`substr`, `find`                                         | 1 天         |
+| `sort`       | `sort(v.begin(), v.end())`                                             | 半天         |
 
 ## 2.2 第二阶段学习（刷题过程中掌握）
 
-| 知识点 | 何时需要 |
-|--------|---------|
-| `unordered_map` / `map` | 专题 4（哈希表） |
-| `unordered_set` / `set` | 专题 4（哈希表） |
-| `stack` / `queue` | 专题 3（栈与队列） |
-| `priority_queue` | 专题 14（堆） |
-| `pair` / `tuple` | 图论题、多值存储 |
-| Lambda 表达式 | 自定义排序 |
-| 递归 | 专题 8（二叉树）开始大量使用 |
-| 位运算 `& | ^ ~ << >>` | 专题 18（位运算） |
+| 知识点                      | 何时需要                     |
+| --------------------------- | ---------------------------- |
+| `unordered_map` / `map` | 专题 4（哈希表）             |
+| `unordered_set` / `set` | 专题 4（哈希表）             |
+| `stack` / `queue`       | 专题 3（栈与队列）           |
+| `priority_queue`          | 专题 14（堆）                |
+| `pair` / `tuple`        | 图论题、多值存储             |
+| Lambda 表达式               | 自定义排序                   |
+| 递归                        | 专题 8（二叉树）开始大量使用 |
+| 位运算                      | `& ^ ~ << >>`              |
 
 ## 2.3 不需要提前学的
 
@@ -126,32 +126,32 @@
 
 ## 4.1 学习顺序
 
-| 周 | 日 | 学习内容 | 对应文档 | 做题量 |
-|----|-----|---------|---------|--------|
-| 1 | 1-2 | 数组基础与遍历 | `knowlege_details_1_array.md/cpp` | 3-4 题 |
-| 1 | 3-4 | 字符串操作 | `knowlege_details_1_string.md/cpp` | 3-4 题 |
-| 1 | 5-7 | 链表（指针、反转、快慢指针）| `knowlege_details_2_linkedlist.md/cpp` | 4-5 题 |
-| 2 | 1-2 | 栈（括号匹配、最小栈）| `knowlege_details_3_stack.md/cpp` | 3-4 题 |
-| 2 | 3-4 | 队列（BFS 基础）| `knowlege_details_3_queue.md/cpp` | 2-3 题 |
-| 2 | 5-7 | 哈希表（两数之和、字母异位）| `knowlege_details_4_map.md/cpp` + `4_set.md/cpp` | 4-5 题 |
-| 3 | 1-3 | 复习 + 做混合题 | 回看上面所有文档 | 5 题 |
+| 周 | 日  | 学习内容                     | 对应文档                                             | 做题量 |
+| -- | --- | ---------------------------- | ---------------------------------------------------- | ------ |
+| 1  | 1-2 | 数组基础与遍历               | `knowlege_details_1_array.md/cpp`                  | 3-4 题 |
+| 1  | 3-4 | 字符串操作                   | `knowlege_details_1_string.md/cpp`                 | 3-4 题 |
+| 1  | 5-7 | 链表（指针、反转、快慢指针） | `knowlege_details_2_linkedlist.md/cpp`             | 4-5 题 |
+| 2  | 1-2 | 栈（括号匹配、最小栈）       | `knowlege_details_3_stack.md/cpp`                  | 3-4 题 |
+| 2  | 3-4 | 队列（BFS 基础）             | `knowlege_details_3_queue.md/cpp`                  | 2-3 题 |
+| 2  | 5-7 | 哈希表（两数之和、字母异位） | `knowlege_details_4_map.md/cpp` + `4_set.md/cpp` | 4-5 题 |
+| 3  | 1-3 | 复习 + 做混合题              | 回看上面所有文档                                     | 5 题   |
 
 ## 4.2 阶段一必做题清单
 
-| 题号 | 题目 | 难度 | 核心知识点 |
-|------|------|------|-----------|
-| 1 | 两数之和 | Easy | 哈希表 |
-| 26 | 删除有序数组中的重复项 | Easy | 双指针覆盖 |
-| 27 | 移除元素 | Easy | 双指针 |
-| 206 | 反转链表 | Easy | 链表 |
-| 21 | 合并两个有序链表 | Easy | 链表 |
-| 141 | 环形链表 | Easy | 快慢指针 |
-| 20 | 有效的括号 | Easy | 栈 |
-| 155 | 最小栈 | Medium | 栈 |
-| 232 | 用栈实现队列 | Easy | 栈/队列 |
-| 242 | 有效的字母异位词 | Easy | 哈希表 |
-| 49 | 字母异位词分组 | Medium | 哈希表 |
-| 217 | 存在重复元素 | Easy | 哈希/排序 |
+| 题号 | 题目                   | 难度   | 核心知识点 |
+| ---- | ---------------------- | ------ | ---------- |
+| 1    | 两数之和               | Easy   | 哈希表     |
+| 26   | 删除有序数组中的重复项 | Easy   | 双指针覆盖 |
+| 27   | 移除元素               | Easy   | 双指针     |
+| 206  | 反转链表               | Easy   | 链表       |
+| 21   | 合并两个有序链表       | Easy   | 链表       |
+| 141  | 环形链表               | Easy   | 快慢指针   |
+| 20   | 有效的括号             | Easy   | 栈         |
+| 155  | 最小栈                 | Medium | 栈         |
+| 232  | 用栈实现队列           | Easy   | 栈/队列    |
+| 242  | 有效的字母异位词       | Easy   | 哈希表     |
+| 49   | 字母异位词分组         | Medium | 哈希表     |
+| 217  | 存在重复元素           | Easy   | 哈希/排序  |
 
 > **每道题做完后**：用 `leetcode_note_template.md` 模板记录思路和代码。
 
@@ -173,76 +173,76 @@
 
 ## 5.1 学习顺序
 
-| 周 | 学习内容 | 对应文档 | 做题量/周 |
-|----|---------|---------|----------|
-| 4 | 双指针全类型 | `knowlege_details_5_two_pointers.md/cpp` | 6-8 题 |
-| 5 | 滑动窗口 | `knowlege_details_6_sliding_window.md/cpp` | 5-6 题 |
-| 5 | 二分查找 | `knowlege_details_7_binary_search.md/cpp` | 5-6 题 |
-| 6-7 | 二叉树 | `knowlege_details_8_tree_traversal.md/cpp` + `8_tree_bst_advanced.md/cpp` | 8-10 题 |
-| 7-8 | 回溯算法 | `knowlege_details_9_backtracking.md/cpp` | 6-8 题 |
-| 8-9 | 动态规划 | `knowlege_details_10_dp_linear.md/cpp` + `10_dp_knapsack.md/cpp` | 10-12 题 |
-| 9 | 贪心算法 | `knowlege_details_11_greedy.md/cpp` | 5-6 题 |
+| 周  | 学习内容     | 对应文档                                                                      | 做题量/周 |
+| --- | ------------ | ----------------------------------------------------------------------------- | --------- |
+| 4   | 双指针全类型 | `knowlege_details_5_two_pointers.md/cpp`                                    | 6-8 题    |
+| 5   | 滑动窗口     | `knowlege_details_6_sliding_window.md/cpp`                                  | 5-6 题    |
+| 5   | 二分查找     | `knowlege_details_7_binary_search.md/cpp`                                   | 5-6 题    |
+| 6-7 | 二叉树       | `knowlege_details_8_tree_traversal.md/cpp` + `8_tree_bst_advanced.md/cpp` | 8-10 题   |
+| 7-8 | 回溯算法     | `knowlege_details_9_backtracking.md/cpp`                                    | 6-8 题    |
+| 8-9 | 动态规划     | `knowlege_details_10_dp_linear.md/cpp` + `10_dp_knapsack.md/cpp`          | 10-12 题  |
+| 9   | 贪心算法     | `knowlege_details_11_greedy.md/cpp`                                         | 5-6 题    |
 
 ## 5.2 阶段二必做题清单
 
 ### 双指针 & 滑窗
 
-| 题号 | 题目 | 难度 | 知识点 |
-|------|------|------|--------|
-| 15 | 三数之和 | Medium | 排序+对撞双指针 |
-| 11 | 盛最多水的容器 | Medium | 对撞双指针 |
-| 3 | 无重复字符最长子串 | Medium | 滑动窗口 |
-| 76 | 最小覆盖子串 | Hard | 滑动窗口 |
-| 209 | 长度最小子数组 | Medium | 滑动窗口 |
+| 题号 | 题目               | 难度   | 知识点          |
+| ---- | ------------------ | ------ | --------------- |
+| 15   | 三数之和           | Medium | 排序+对撞双指针 |
+| 11   | 盛最多水的容器     | Medium | 对撞双指针      |
+| 3    | 无重复字符最长子串 | Medium | 滑动窗口        |
+| 76   | 最小覆盖子串       | Hard   | 滑动窗口        |
+| 209  | 长度最小子数组     | Medium | 滑动窗口        |
 
 ### 二分查找
 
-| 题号 | 题目 | 难度 | 知识点 |
-|------|------|------|--------|
-| 704 | 二分查找 | Easy | 基础模板 |
-| 34 | 排序数组中查找元素 | Medium | 左右边界 |
-| 33 | 搜索旋转排序数组 | Medium | 变形二分 |
-| 875 | 爱吃香蕉的珂珂 | Medium | 二分答案 |
+| 题号 | 题目               | 难度   | 知识点   |
+| ---- | ------------------ | ------ | -------- |
+| 704  | 二分查找           | Easy   | 基础模板 |
+| 34   | 排序数组中查找元素 | Medium | 左右边界 |
+| 33   | 搜索旋转排序数组   | Medium | 变形二分 |
+| 875  | 爱吃香蕉的珂珂     | Medium | 二分答案 |
 
 ### 二叉树
 
-| 题号 | 题目 | 难度 | 知识点 |
-|------|------|------|--------|
-| 104 | 二叉树最大深度 | Easy | 递归 |
-| 226 | 翻转二叉树 | Easy | 递归 |
-| 102 | 层序遍历 | Medium | BFS |
-| 98 | 验证二叉搜索树 | Medium | 中序遍历 |
-| 236 | 最近公共祖先 | Medium | 递归 |
+| 题号 | 题目           | 难度   | 知识点   |
+| ---- | -------------- | ------ | -------- |
+| 104  | 二叉树最大深度 | Easy   | 递归     |
+| 226  | 翻转二叉树     | Easy   | 递归     |
+| 102  | 层序遍历       | Medium | BFS      |
+| 98   | 验证二叉搜索树 | Medium | 中序遍历 |
+| 236  | 最近公共祖先   | Medium | 递归     |
 
 ### 回溯
 
-| 题号 | 题目 | 难度 | 知识点 |
-|------|------|------|--------|
-| 46 | 全排列 | Medium | 基础回溯 |
-| 78 | 子集 | Medium | 基础回溯 |
-| 77 | 组合 | Medium | 基础回溯 |
-| 39 | 组合总和 | Medium | 可重复选择 |
-| 51 | N 皇后 | Hard | 回溯+剪枝 |
+| 题号 | 题目     | 难度   | 知识点     |
+| ---- | -------- | ------ | ---------- |
+| 46   | 全排列   | Medium | 基础回溯   |
+| 78   | 子集     | Medium | 基础回溯   |
+| 77   | 组合     | Medium | 基础回溯   |
+| 39   | 组合总和 | Medium | 可重复选择 |
+| 51   | N 皇后   | Hard   | 回溯+剪枝  |
 
 ### 动态规划
 
-| 题号 | 题目 | 难度 | 知识点 |
-|------|------|------|--------|
-| 70 | 爬楼梯 | Easy | 基础 DP |
-| 198 | 打家劫舍 | Medium | 线性 DP |
-| 53 | 最大子数组和 | Medium | Kadane |
-| 300 | 最长递增子序列 | Medium | LIS |
-| 322 | 零钱兑换 | Medium | 完全背包 |
-| 416 | 分割等和子集 | Medium | 0-1 背包 |
-| 1143 | 最长公共子序列 | Medium | 二维 DP |
+| 题号 | 题目           | 难度   | 知识点   |
+| ---- | -------------- | ------ | -------- |
+| 70   | 爬楼梯         | Easy   | 基础 DP  |
+| 198  | 打家劫舍       | Medium | 线性 DP  |
+| 53   | 最大子数组和   | Medium | Kadane   |
+| 300  | 最长递增子序列 | Medium | LIS      |
+| 322  | 零钱兑换       | Medium | 完全背包 |
+| 416  | 分割等和子集   | Medium | 0-1 背包 |
+| 1143 | 最长公共子序列 | Medium | 二维 DP  |
 
 ### 贪心
 
-| 题号 | 题目 | 难度 | 知识点 |
-|------|------|------|--------|
-| 55 | 跳跃游戏 | Medium | 最远可达 |
-| 56 | 合并区间 | Medium | 排序+贪心 |
-| 435 | 无重叠区间 | Medium | 区间调度 |
+| 题号 | 题目       | 难度   | 知识点    |
+| ---- | ---------- | ------ | --------- |
+| 55   | 跳跃游戏   | Medium | 最远可达  |
+| 56   | 合并区间   | Medium | 排序+贪心 |
+| 435  | 无重叠区间 | Medium | 区间调度  |
 
 ## 5.3 阶段二检验标准
 
@@ -261,29 +261,29 @@
 
 ## 6.1 学习顺序
 
-| 周 | 学习内容 | 对应文档 |
-|----|---------|---------|
-| 10 | 图论 BFS/DFS | `knowlege_details_12_graph_bfs_dfs.md/cpp` |
-| 11 | 图论进阶（最短路、拓扑）| `knowlege_details_12_graph_advanced.md/cpp` |
-| 11 | 排序算法 | `knowlege_details_13_sort_basics.md/cpp` + `13_sort_advanced.md/cpp` |
-| 12 | 堆/优先队列 | `knowlege_details_14_heap.md/cpp` |
-| 13 | Trie 字典树 | `knowlege_details_15_trie.md/cpp` |
-| 13 | 并查集 | `knowlege_details_16_union_find.md/cpp` |
+| 周 | 学习内容                 | 对应文档                                                                 |
+| -- | ------------------------ | ------------------------------------------------------------------------ |
+| 10 | 图论 BFS/DFS             | `knowlege_details_12_graph_bfs_dfs.md/cpp`                             |
+| 11 | 图论进阶（最短路、拓扑） | `knowlege_details_12_graph_advanced.md/cpp`                            |
+| 11 | 排序算法                 | `knowlege_details_13_sort_basics.md/cpp` + `13_sort_advanced.md/cpp` |
+| 12 | 堆/优先队列              | `knowlege_details_14_heap.md/cpp`                                      |
+| 13 | Trie 字典树              | `knowlege_details_15_trie.md/cpp`                                      |
+| 13 | 并查集                   | `knowlege_details_16_union_find.md/cpp`                                |
 
 ## 6.2 阶段三必做题清单
 
-| 题号 | 题目 | 难度 | 知识点 |
-|------|------|------|--------|
-| 200 | 岛屿数量 | Medium | DFS/BFS |
-| 207 | 课程表 | Medium | 拓扑排序 |
-| 743 | 网络延迟时间 | Medium | Dijkstra |
-| 215 | 数组第K大元素 | Medium | 堆/快选 |
-| 23 | 合并K个排序链表 | Hard | 堆 |
-| 295 | 数据流中位数 | Hard | 双堆 |
-| 208 | 实现 Trie | Medium | 字典树 |
-| 547 | 省份数量 | Medium | 并查集 |
-| 684 | 冗余连接 | Medium | 并查集 |
-| 146 | LRU 缓存 | Medium | 哈希+双向链表 |
+| 题号 | 题目            | 难度   | 知识点        |
+| ---- | --------------- | ------ | ------------- |
+| 200  | 岛屿数量        | Medium | DFS/BFS       |
+| 207  | 课程表          | Medium | 拓扑排序      |
+| 743  | 网络延迟时间    | Medium | Dijkstra      |
+| 215  | 数组第K大元素   | Medium | 堆/快选       |
+| 23   | 合并K个排序链表 | Hard   | 堆            |
+| 295  | 数据流中位数    | Hard   | 双堆          |
+| 208  | 实现 Trie       | Medium | 字典树        |
+| 547  | 省份数量        | Medium | 并查集        |
+| 684  | 冗余连接        | Medium | 并查集        |
+| 146  | LRU 缓存        | Medium | 哈希+双向链表 |
 
 ## 6.3 阶段三检验标准
 
@@ -302,27 +302,27 @@
 
 ## 7.1 学习顺序
 
-| 周 | 学习内容 | 对应文档 |
-|----|---------|---------|
-| 14 | 单调栈 | `knowlege_details_17_monotonic_stack.md/cpp` |
-| 14 | 单调队列 | `knowlege_details_17_monotonic_queue.md/cpp` |
-| 15 | 位运算 | `knowlege_details_18_bit_manipulation.md/cpp` |
-| 15 | 前缀和 | `knowlege_details_19_prefix_sum.md/cpp` |
+| 周 | 学习内容 | 对应文档                                        |
+| -- | -------- | ----------------------------------------------- |
+| 14 | 单调栈   | `knowlege_details_17_monotonic_stack.md/cpp`  |
+| 14 | 单调队列 | `knowlege_details_17_monotonic_queue.md/cpp`  |
+| 15 | 位运算   | `knowlege_details_18_bit_manipulation.md/cpp` |
+| 15 | 前缀和   | `knowlege_details_19_prefix_sum.md/cpp`       |
 | 16 | 差分数组 | `knowlege_details_19_difference_array.md/cpp` |
-| 16 | 树状数组 | `knowlege_details_20_bit.md/cpp` |
-| 17 | 线段树 | `knowlege_details_20_segment_tree.md/cpp` |
+| 16 | 树状数组 | `knowlege_details_20_bit.md/cpp`              |
+| 17 | 线段树   | `knowlege_details_20_segment_tree.md/cpp`     |
 
 ## 7.2 阶段四必做题
 
-| 题号 | 题目 | 难度 | 知识点 |
-|------|------|------|--------|
-| 739 | 每日温度 | Medium | 单调栈 |
-| 84 | 柱状图最大矩形 | Hard | 单调栈 |
-| 239 | 滑动窗口最大值 | Hard | 单调队列 |
-| 136 | 只出现一次的数字 | Easy | 异或 |
-| 560 | 和为K的子数组 | Medium | 前缀和+哈希 |
-| 307 | 区域和检索(可修改) | Medium | BIT/线段树 |
-| 315 | 计算右侧小于当前元素个数 | Hard | BIT+离散化 |
+| 题号 | 题目                     | 难度   | 知识点      |
+| ---- | ------------------------ | ------ | ----------- |
+| 739  | 每日温度                 | Medium | 单调栈      |
+| 84   | 柱状图最大矩形           | Hard   | 单调栈      |
+| 239  | 滑动窗口最大值           | Hard   | 单调队列    |
+| 136  | 只出现一次的数字         | Easy   | 异或        |
+| 560  | 和为K的子数组            | Medium | 前缀和+哈希 |
+| 307  | 区域和检索(可修改)       | Medium | BIT/线段树  |
+| 315  | 计算右侧小于当前元素个数 | Hard   | BIT+离散化  |
 
 ---
 
@@ -381,7 +381,7 @@
 ```
 Step 1: 审题（3 分钟）
   • 读题 2-3 遍，确保理解
-  • 看 Constraints（数据范围）→ 反推时间复杂度
+  • 看数据范围 → 反推时间复杂度
   • 看示例，手动验证理解
 
 Step 2: 想思路（10-15 分钟）
@@ -418,10 +418,10 @@ Step 5: 学习最优解（5-10 分钟）  ← 最重要！
 
 ## 9.3 刷题三遍法
 
-| 遍数 | 目标 | 方法 |
-|------|------|------|
-| **第一遍** | 学习 | 不会就看题解，理解算法思路 |
-| **第二遍** | 巩固 | 隔 3-7 天重做，尽量独立完成 |
+| 遍数             | 目标 | 方法                          |
+| ---------------- | ---- | ----------------------------- |
+| **第一遍** | 学习 | 不会就看题解，理解算法思路    |
+| **第二遍** | 巩固 | 隔 3-7 天重做，尽量独立完成   |
 | **第三遍** | 内化 | 隔 2-4 周重做，确保能快速写出 |
 
 ---
@@ -430,25 +430,25 @@ Step 5: 学习最优解（5-10 分钟）  ← 最重要！
 
 ## 10.1 刷题误区
 
-| 误区 | 问题 | 正确做法 |
-|------|------|---------|
-| **贪多求快** | 一天做 10 题但都不理解 | 一天 2-3 题，每题搞透 |
-| **只做 Easy** | 停留在舒适区 | Easy 练手感后尽快做 Medium |
-| **不看题解** | 一道题死磕 2 小时 | 20 分钟没思路就看题解学习 |
-| **只看题解不写** | 觉得看懂了就行 | 一定要动手写代码 AC |
-| **不做笔记** | 每道题做完就忘 | 用笔记模板记录关键思路 |
-| **随机刷题** | 东一题西一题没有体系 | 按专题系统刷 |
-| **不复习** | 做过的题回头不认识 | 按遗忘曲线定期复习 |
-| **追求一次 AC** | 没有 bug 不正常 | 调试是正常的，从 bug 中学习 |
+| 误区                   | 问题                   | 正确做法                    |
+| ---------------------- | ---------------------- | --------------------------- |
+| **贪多求快**     | 一天做 10 题但都不理解 | 一天 2-3 题，每题搞透       |
+| **只做 Easy**    | 停留在舒适区           | Easy 练手感后尽快做 Medium  |
+| **不看题解**     | 一道题死磕 2 小时      | 20 分钟没思路就看题解学习   |
+| **只看题解不写** | 觉得看懂了就行         | 一定要动手写代码 AC         |
+| **不做笔记**     | 每道题做完就忘         | 用笔记模板记录关键思路      |
+| **随机刷题**     | 东一题西一题没有体系   | 按专题系统刷                |
+| **不复习**       | 做过的题回头不认识     | 按遗忘曲线定期复习          |
+| **追求一次 AC**  | 没有 bug 不正常        | 调试是正常的，从 bug 中学习 |
 
 ## 10.2 学习误区
 
-| 误区 | 问题 | 正确做法 |
-|------|------|---------|
-| **先学完所有理论** | 学了很久不动手 | 理论+实践交替进行 |
-| **跳过基础** | 直接学 DP/图论 | 按路线从基础开始 |
-| **只看视频** | 被动学习效率低 | 看完视频立刻动手实践 |
-| **不整理模板** | 每次从头想 | 把模板整理好随时查用 |
+| 误区                     | 问题           | 正确做法             |
+| ------------------------ | -------------- | -------------------- |
+| **先学完所有理论** | 学了很久不动手 | 理论+实践交替进行    |
+| **跳过基础**       | 直接学 DP/图论 | 按路线从基础开始     |
+| **只看视频**       | 被动学习效率低 | 看完视频立刻动手实践 |
+| **不整理模板**     | 每次从头想     | 把模板整理好随时查用 |
 
 ---
 
@@ -458,50 +458,50 @@ Step 5: 学习最优解（5-10 分钟）  ← 最重要！
 
 ### 📋 指南与工具类
 
-| 文件 | 用途 | 何时使用 |
-|------|------|---------|
-| `leetcode_guide.md` | 刷题总指南 | 开始前读 |
-| `leetcode_knowledge_base.md` | 20 专题精华总览 | 快速查阅 |
-| `leetcode_progress_tracker.md` | 进度追踪表 | 每天记录 |
-| `leetcode_note_template.md` | 单题笔记模板 | 每做完一题用 |
-| `knowlege_appendix_detailed.md` | 附录深度分析（复杂度/决策图）| 做题前查复杂度 |
-| `knowlege_gap_analysis.md` | 查漏补缺总结 | 复习阶段用 |
-| `knowlege_study_roadmap.md`（本文件）| 零基础学习路线 | 开始前精读 |
+| 文件                                    | 用途                          | 何时使用       |
+| --------------------------------------- | ----------------------------- | -------------- |
+| `leetcode_guide.md`                   | 刷题总指南                    | 开始前读       |
+| `leetcode_knowledge_base.md`          | 20 专题精华总览               | 快速查阅       |
+| `leetcode_progress_tracker.md`        | 进度追踪表                    | 每天记录       |
+| `leetcode_note_template.md`           | 单题笔记模板                  | 每做完一题用   |
+| `knowlege_appendix_detailed.md`       | 附录深度分析（复杂度/决策图） | 做题前查复杂度 |
+| `knowlege_gap_analysis.md`            | 查漏补缺总结                  | 复习阶段用     |
+| `knowlege_study_roadmap.md`（本文件） | 零基础学习路线                | 开始前精读     |
 
 ### 📖 专题详解文档（MD + CPP 配对）
 
-| 专题 | MD 文档 | CPP 代码 |
-|------|---------|---------|
-| 1-数组 | `knowlege_details_1_array.md` | `1_array.cpp` |
-| 1-字符串 | `knowlege_details_1_string.md` | `1_string.cpp` |
-| 2-链表 | `knowlege_details_2_linkedlist.md` | `2_linkedlist.cpp` |
-| 3-栈 | `knowlege_details_3_stack.md` | `3_stack.cpp` |
-| 3-队列 | `knowlege_details_3_queue.md` | `3_queue.cpp` |
-| 4-哈希(map) | `knowlege_details_4_map.md` | `4_map.cpp` |
-| 4-哈希(set) | `knowlege_details_4_set.md` | `4_set.cpp` |
-| 5-双指针 | `knowlege_details_5_two_pointers.md` | `5_two_pointers.cpp` |
-| 6-滑动窗口 | `knowlege_details_6_sliding_window.md` | `6_sliding_window.cpp` |
-| 7-二分查找 | `knowlege_details_7_binary_search.md` | `7_binary_search.cpp` |
-| 8-二叉树遍历 | `knowlege_details_8_tree_traversal.md` | `8_tree_traversal.cpp` |
-| 8-BST进阶 | `knowlege_details_8_tree_bst_advanced.md` | `8_tree_bst_advanced.cpp` |
-| 9-回溯 | `knowlege_details_9_backtracking.md` | `9_backtracking.cpp` |
-| 10-线性DP | `knowlege_details_10_dp_linear.md` | `10_dp_linear.cpp` |
-| 10-背包DP | `knowlege_details_10_dp_knapsack.md` | `10_dp_knapsack.cpp` |
-| 11-贪心 | `knowlege_details_11_greedy.md` | `11_greedy.cpp` |
-| 12-图BFS/DFS | `knowlege_details_12_graph_bfs_dfs.md` | `12_graph_bfs_dfs.cpp` |
-| 12-图进阶 | `knowlege_details_12_graph_advanced.md` | `12_graph_advanced.cpp` |
-| 13-基础排序 | `knowlege_details_13_sort_basics.md` | `13_sort_basics.cpp` |
-| 13-进阶排序 | `knowlege_details_13_sort_advanced.md` | `13_sort_advanced.cpp` |
-| 14-堆 | `knowlege_details_14_heap.md` | `14_heap.cpp` |
-| 15-Trie | `knowlege_details_15_trie.md` | `15_trie.cpp` |
-| 16-并查集 | `knowlege_details_16_union_find.md` | `16_union_find.cpp` |
-| 17-单调栈 | `knowlege_details_17_monotonic_stack.md` | `17_monotonic_stack.cpp` |
-| 17-单调队列 | `knowlege_details_17_monotonic_queue.md` | `17_monotonic_queue.cpp` |
-| 18-位运算 | `knowlege_details_18_bit_manipulation.md` | `18_bit_manipulation.cpp` |
-| 19-前缀和 | `knowlege_details_19_prefix_sum.md` | `19_prefix_sum.cpp` |
-| 19-差分 | `knowlege_details_19_difference_array.md` | `19_difference_array.cpp` |
-| 20-树状数组 | `knowlege_details_20_bit.md` | `20_bit.cpp` |
-| 20-线段树 | `knowlege_details_20_segment_tree.md` | `20_segment_tree.cpp` |
+| 专题         | MD 文档                                     | CPP 代码                    |
+| ------------ | ------------------------------------------- | --------------------------- |
+| 1-数组       | `knowlege_details_1_array.md`             | `1_array.cpp`             |
+| 1-字符串     | `knowlege_details_1_string.md`            | `1_string.cpp`            |
+| 2-链表       | `knowlege_details_2_linkedlist.md`        | `2_linkedlist.cpp`        |
+| 3-栈         | `knowlege_details_3_stack.md`             | `3_stack.cpp`             |
+| 3-队列       | `knowlege_details_3_queue.md`             | `3_queue.cpp`             |
+| 4-哈希(map)  | `knowlege_details_4_map.md`               | `4_map.cpp`               |
+| 4-哈希(set)  | `knowlege_details_4_set.md`               | `4_set.cpp`               |
+| 5-双指针     | `knowlege_details_5_two_pointers.md`      | `5_two_pointers.cpp`      |
+| 6-滑动窗口   | `knowlege_details_6_sliding_window.md`    | `6_sliding_window.cpp`    |
+| 7-二分查找   | `knowlege_details_7_binary_search.md`     | `7_binary_search.cpp`     |
+| 8-二叉树遍历 | `knowlege_details_8_tree_traversal.md`    | `8_tree_traversal.cpp`    |
+| 8-BST进阶    | `knowlege_details_8_tree_bst_advanced.md` | `8_tree_bst_advanced.cpp` |
+| 9-回溯       | `knowlege_details_9_backtracking.md`      | `9_backtracking.cpp`      |
+| 10-线性DP    | `knowlege_details_10_dp_linear.md`        | `10_dp_linear.cpp`        |
+| 10-背包DP    | `knowlege_details_10_dp_knapsack.md`      | `10_dp_knapsack.cpp`      |
+| 11-贪心      | `knowlege_details_11_greedy.md`           | `11_greedy.cpp`           |
+| 12-图BFS/DFS | `knowlege_details_12_graph_bfs_dfs.md`    | `12_graph_bfs_dfs.cpp`    |
+| 12-图进阶    | `knowlege_details_12_graph_advanced.md`   | `12_graph_advanced.cpp`   |
+| 13-基础排序  | `knowlege_details_13_sort_basics.md`      | `13_sort_basics.cpp`      |
+| 13-进阶排序  | `knowlege_details_13_sort_advanced.md`    | `13_sort_advanced.cpp`    |
+| 14-堆        | `knowlege_details_14_heap.md`             | `14_heap.cpp`             |
+| 15-Trie      | `knowlege_details_15_trie.md`             | `15_trie.cpp`             |
+| 16-并查集    | `knowlege_details_16_union_find.md`       | `16_union_find.cpp`       |
+| 17-单调栈    | `knowlege_details_17_monotonic_stack.md`  | `17_monotonic_stack.cpp`  |
+| 17-单调队列  | `knowlege_details_17_monotonic_queue.md`  | `17_monotonic_queue.cpp`  |
+| 18-位运算    | `knowlege_details_18_bit_manipulation.md` | `18_bit_manipulation.cpp` |
+| 19-前缀和    | `knowlege_details_19_prefix_sum.md`       | `19_prefix_sum.cpp`       |
+| 19-差分      | `knowlege_details_19_difference_array.md` | `19_difference_array.cpp` |
+| 20-树状数组  | `knowlege_details_20_bit.md`              | `20_bit.cpp`              |
+| 20-线段树    | `knowlege_details_20_segment_tree.md`     | `20_segment_tree.cpp`     |
 
 ## 11.2 推荐使用流程
 
@@ -531,118 +531,118 @@ Step 5: 学习最优解（5-10 分钟）  ← 最重要！
 
 ## 第一阶段：基础（30 题）
 
-| # | LC 题号 | 题目名称 | 难度 | 核心知识点 |
-|---|---------|---------|------|-----------|
-| 1 | 1 | 两数之和 | Easy | 哈希表 |
-| 2 | 26 | 删除有序数组重复项 | Easy | 双指针覆盖 |
-| 3 | 27 | 移除元素 | Easy | 双指针 |
-| 4 | 88 | 合并两个有序数组 | Easy | 双指针 |
-| 5 | 283 | 移动零 | Easy | 双指针 |
-| 6 | 344 | 反转字符串 | Easy | 对撞指针 |
-| 7 | 242 | 有效的字母异位词 | Easy | 哈希表 |
-| 8 | 217 | 存在重复元素 | Easy | 哈希/排序 |
-| 9 | 206 | 反转链表 | Easy | 链表 |
-| 10 | 21 | 合并两个有序链表 | Easy | 链表 |
-| 11 | 83 | 删除排序链表重复元素 | Easy | 链表 |
-| 12 | 141 | 环形链表 | Easy | 快慢指针 |
-| 13 | 142 | 环形链表 II | Medium | 快慢指针 |
-| 14 | 160 | 相交链表 | Easy | 双指针 |
-| 15 | 20 | 有效的括号 | Easy | 栈 |
-| 16 | 155 | 最小栈 | Medium | 栈 |
-| 17 | 232 | 用栈实现队列 | Easy | 栈/队列 |
-| 18 | 225 | 用队列实现栈 | Easy | 栈/队列 |
-| 19 | 49 | 字母异位词分组 | Medium | 哈希表 |
-| 20 | 128 | 最长连续序列 | Medium | 哈希表 |
-| 21 | 167 | 两数之和 II | Medium | 双指针 |
-| 22 | 15 | 三数之和 | Medium | 排序+双指针 |
-| 23 | 11 | 盛最多水的容器 | Medium | 对撞指针 |
-| 24 | 42 | 接雨水 | Hard | 双指针/单调栈 |
-| 25 | 3 | 无重复字符最长子串 | Medium | 滑动窗口 |
-| 26 | 209 | 长度最小子数组 | Medium | 滑动窗口 |
-| 27 | 76 | 最小覆盖子串 | Hard | 滑动窗口 |
-| 28 | 704 | 二分查找 | Easy | 二分 |
-| 29 | 34 | 排序数组中查找 | Medium | 二分左右边界 |
-| 30 | 33 | 搜索旋转排序数组 | Medium | 变形二分 |
+| #  | LC 题号 | 题目名称             | 难度   | 核心知识点    |
+| -- | ------- | -------------------- | ------ | ------------- |
+| 1  | 1       | 两数之和             | Easy   | 哈希表        |
+| 2  | 26      | 删除有序数组重复项   | Easy   | 双指针覆盖    |
+| 3  | 27      | 移除元素             | Easy   | 双指针        |
+| 4  | 88      | 合并两个有序数组     | Easy   | 双指针        |
+| 5  | 283     | 移动零               | Easy   | 双指针        |
+| 6  | 344     | 反转字符串           | Easy   | 对撞指针      |
+| 7  | 242     | 有效的字母异位词     | Easy   | 哈希表        |
+| 8  | 217     | 存在重复元素         | Easy   | 哈希/排序     |
+| 9  | 206     | 反转链表             | Easy   | 链表          |
+| 10 | 21      | 合并两个有序链表     | Easy   | 链表          |
+| 11 | 83      | 删除排序链表重复元素 | Easy   | 链表          |
+| 12 | 141     | 环形链表             | Easy   | 快慢指针      |
+| 13 | 142     | 环形链表 II          | Medium | 快慢指针      |
+| 14 | 160     | 相交链表             | Easy   | 双指针        |
+| 15 | 20      | 有效的括号           | Easy   | 栈            |
+| 16 | 155     | 最小栈               | Medium | 栈            |
+| 17 | 232     | 用栈实现队列         | Easy   | 栈/队列       |
+| 18 | 225     | 用队列实现栈         | Easy   | 栈/队列       |
+| 19 | 49      | 字母异位词分组       | Medium | 哈希表        |
+| 20 | 128     | 最长连续序列         | Medium | 哈希表        |
+| 21 | 167     | 两数之和 II          | Medium | 双指针        |
+| 22 | 15      | 三数之和             | Medium | 排序+双指针   |
+| 23 | 11      | 盛最多水的容器       | Medium | 对撞指针      |
+| 24 | 42      | 接雨水               | Hard   | 双指针/单调栈 |
+| 25 | 3       | 无重复字符最长子串   | Medium | 滑动窗口      |
+| 26 | 209     | 长度最小子数组       | Medium | 滑动窗口      |
+| 27 | 76      | 最小覆盖子串         | Hard   | 滑动窗口      |
+| 28 | 704     | 二分查找             | Easy   | 二分          |
+| 29 | 34      | 排序数组中查找       | Medium | 二分左右边界  |
+| 30 | 33      | 搜索旋转排序数组     | Medium | 变形二分      |
 
 ## 第二阶段：核心算法（40 题）
 
-| # | LC 题号 | 题目名称 | 难度 | 核心知识点 |
-|---|---------|---------|------|-----------|
-| 31 | 104 | 二叉树最大深度 | Easy | 递归 |
-| 32 | 226 | 翻转二叉树 | Easy | 递归 |
-| 33 | 101 | 对称二叉树 | Easy | 递归 |
-| 34 | 102 | 层序遍历 | Medium | BFS |
-| 35 | 94 | 中序遍历 | Easy | 栈/递归 |
-| 36 | 98 | 验证 BST | Medium | 中序 |
-| 37 | 236 | 最近公共祖先 | Medium | 递归 |
-| 38 | 105 | 前序中序构造树 | Medium | 分治 |
-| 39 | 114 | 展平为链表 | Medium | 递归 |
-| 40 | 124 | 最大路径和 | Hard | 树形递归 |
-| 41 | 46 | 全排列 | Medium | 回溯 |
-| 42 | 47 | 全排列 II | Medium | 回溯去重 |
-| 43 | 78 | 子集 | Medium | 回溯 |
-| 44 | 77 | 组合 | Medium | 回溯 |
-| 45 | 39 | 组合总和 | Medium | 回溯 |
-| 46 | 40 | 组合总和 II | Medium | 回溯去重 |
-| 47 | 131 | 分割回文串 | Medium | 回溯 |
-| 48 | 51 | N 皇后 | Hard | 回溯+剪枝 |
-| 49 | 70 | 爬楼梯 | Easy | 基础 DP |
-| 50 | 198 | 打家劫舍 | Medium | 线性 DP |
-| 51 | 213 | 打家劫舍 II | Medium | 环形 DP |
-| 52 | 53 | 最大子数组和 | Medium | Kadane |
-| 53 | 300 | 最长递增子序列 | Medium | LIS |
-| 54 | 1143 | 最长公共子序列 | Medium | 二维 DP |
-| 55 | 72 | 编辑距离 | Medium | 二维 DP |
-| 56 | 62 | 不同路径 | Medium | 网格 DP |
-| 57 | 64 | 最小路径和 | Medium | 网格 DP |
-| 58 | 322 | 零钱兑换 | Medium | 完全背包 |
-| 59 | 416 | 分割等和子集 | Medium | 0-1 背包 |
-| 60 | 494 | 目标和 | Medium | 背包变形 |
-| 61 | 121 | 买卖股票 I | Easy | 贪心/DP |
-| 62 | 122 | 买卖股票 II | Medium | 贪心 |
-| 63 | 55 | 跳跃游戏 | Medium | 贪心 |
-| 64 | 45 | 跳跃游戏 II | Medium | 贪心 |
-| 65 | 56 | 合并区间 | Medium | 排序+贪心 |
-| 66 | 435 | 无重叠区间 | Medium | 贪心 |
-| 67 | 455 | 分发饼干 | Easy | 排序+贪心 |
-| 68 | 875 | 爱吃香蕉的珂珂 | Medium | 二分答案 |
-| 69 | 1011 | D天内送达包裹 | Medium | 二分答案 |
-| 70 | 152 | 乘积最大子数组 | Medium | DP |
+| #  | LC 题号 | 题目名称       | 难度   | 核心知识点 |
+| -- | ------- | -------------- | ------ | ---------- |
+| 31 | 104     | 二叉树最大深度 | Easy   | 递归       |
+| 32 | 226     | 翻转二叉树     | Easy   | 递归       |
+| 33 | 101     | 对称二叉树     | Easy   | 递归       |
+| 34 | 102     | 层序遍历       | Medium | BFS        |
+| 35 | 94      | 中序遍历       | Easy   | 栈/递归    |
+| 36 | 98      | 验证 BST       | Medium | 中序       |
+| 37 | 236     | 最近公共祖先   | Medium | 递归       |
+| 38 | 105     | 前序中序构造树 | Medium | 分治       |
+| 39 | 114     | 展平为链表     | Medium | 递归       |
+| 40 | 124     | 最大路径和     | Hard   | 树形递归   |
+| 41 | 46      | 全排列         | Medium | 回溯       |
+| 42 | 47      | 全排列 II      | Medium | 回溯去重   |
+| 43 | 78      | 子集           | Medium | 回溯       |
+| 44 | 77      | 组合           | Medium | 回溯       |
+| 45 | 39      | 组合总和       | Medium | 回溯       |
+| 46 | 40      | 组合总和 II    | Medium | 回溯去重   |
+| 47 | 131     | 分割回文串     | Medium | 回溯       |
+| 48 | 51      | N 皇后         | Hard   | 回溯+剪枝  |
+| 49 | 70      | 爬楼梯         | Easy   | 基础 DP    |
+| 50 | 198     | 打家劫舍       | Medium | 线性 DP    |
+| 51 | 213     | 打家劫舍 II    | Medium | 环形 DP    |
+| 52 | 53      | 最大子数组和   | Medium | Kadane     |
+| 53 | 300     | 最长递增子序列 | Medium | LIS        |
+| 54 | 1143    | 最长公共子序列 | Medium | 二维 DP    |
+| 55 | 72      | 编辑距离       | Medium | 二维 DP    |
+| 56 | 62      | 不同路径       | Medium | 网格 DP    |
+| 57 | 64      | 最小路径和     | Medium | 网格 DP    |
+| 58 | 322     | 零钱兑换       | Medium | 完全背包   |
+| 59 | 416     | 分割等和子集   | Medium | 0-1 背包   |
+| 60 | 494     | 目标和         | Medium | 背包变形   |
+| 61 | 121     | 买卖股票 I     | Easy   | 贪心/DP    |
+| 62 | 122     | 买卖股票 II    | Medium | 贪心       |
+| 63 | 55      | 跳跃游戏       | Medium | 贪心       |
+| 64 | 45      | 跳跃游戏 II    | Medium | 贪心       |
+| 65 | 56      | 合并区间       | Medium | 排序+贪心  |
+| 66 | 435     | 无重叠区间     | Medium | 贪心       |
+| 67 | 455     | 分发饼干       | Easy   | 排序+贪心  |
+| 68 | 875     | 爱吃香蕉的珂珂 | Medium | 二分答案   |
+| 69 | 1011    | D天内送达包裹  | Medium | 二分答案   |
+| 70 | 152     | 乘积最大子数组 | Medium | DP         |
 
 ## 第三阶段：进阶（30 题）
 
-| # | LC 题号 | 题目名称 | 难度 | 核心知识点 |
-|---|---------|---------|------|-----------|
-| 71 | 200 | 岛屿数量 | Medium | DFS/BFS |
-| 72 | 695 | 最大岛屿面积 | Medium | DFS |
-| 73 | 994 | 腐烂的橘子 | Medium | 多源 BFS |
-| 74 | 207 | 课程表 | Medium | 拓扑排序 |
-| 75 | 210 | 课程表 II | Medium | 拓扑排序 |
-| 76 | 743 | 网络延迟时间 | Medium | Dijkstra |
-| 77 | 148 | 排序链表 | Medium | 归并排序 |
-| 78 | 215 | 第K大元素 | Medium | 堆/快选 |
-| 79 | 347 | 前K个高频元素 | Medium | 堆/桶排序 |
-| 80 | 23 | 合并K个排序链表 | Hard | 堆 |
-| 81 | 295 | 数据流中位数 | Hard | 双堆 |
-| 82 | 208 | 实现 Trie | Medium | 字典树 |
-| 83 | 212 | 单词搜索 II | Hard | Trie+回溯 |
-| 84 | 547 | 省份数量 | Medium | 并查集 |
-| 85 | 684 | 冗余连接 | Medium | 并查集 |
-| 86 | 146 | LRU 缓存 | Medium | 哈希+链表 |
-| 87 | 739 | 每日温度 | Medium | 单调栈 |
-| 88 | 496 | 下一个更大元素 | Easy | 单调栈 |
-| 89 | 84 | 柱状图最大矩形 | Hard | 单调栈 |
-| 90 | 239 | 滑动窗口最大值 | Hard | 单调队列 |
-| 91 | 136 | 只出现一次的数 | Easy | 异或 |
-| 92 | 338 | 比特位计数 | Easy | 位运算 DP |
-| 93 | 560 | 和为K的子数组 | Medium | 前缀和+哈希 |
-| 94 | 238 | 除自身以外乘积 | Medium | 前缀/后缀积 |
-| 95 | 1094 | 拼车 | Medium | 差分 |
-| 96 | 307 | 区域和检索(可修改) | Medium | BIT/线段树 |
-| 97 | 315 | 右侧小于当前元素 | Hard | BIT+离散化 |
-| 98 | 218 | 天际线问题 | Hard | 扫描线+堆 |
-| 99 | 312 | 戳气球 | Hard | 区间 DP |
-| 100 | 10 | 正则表达式匹配 | Hard | DP |
+| #   | LC 题号 | 题目名称           | 难度   | 核心知识点  |
+| --- | ------- | ------------------ | ------ | ----------- |
+| 71  | 200     | 岛屿数量           | Medium | DFS/BFS     |
+| 72  | 695     | 最大岛屿面积       | Medium | DFS         |
+| 73  | 994     | 腐烂的橘子         | Medium | 多源 BFS    |
+| 74  | 207     | 课程表             | Medium | 拓扑排序    |
+| 75  | 210     | 课程表 II          | Medium | 拓扑排序    |
+| 76  | 743     | 网络延迟时间       | Medium | Dijkstra    |
+| 77  | 148     | 排序链表           | Medium | 归并排序    |
+| 78  | 215     | 第K大元素          | Medium | 堆/快选     |
+| 79  | 347     | 前K个高频元素      | Medium | 堆/桶排序   |
+| 80  | 23      | 合并K个排序链表    | Hard   | 堆          |
+| 81  | 295     | 数据流中位数       | Hard   | 双堆        |
+| 82  | 208     | 实现 Trie          | Medium | 字典树      |
+| 83  | 212     | 单词搜索 II        | Hard   | Trie+回溯   |
+| 84  | 547     | 省份数量           | Medium | 并查集      |
+| 85  | 684     | 冗余连接           | Medium | 并查集      |
+| 86  | 146     | LRU 缓存           | Medium | 哈希+链表   |
+| 87  | 739     | 每日温度           | Medium | 单调栈      |
+| 88  | 496     | 下一个更大元素     | Easy   | 单调栈      |
+| 89  | 84      | 柱状图最大矩形     | Hard   | 单调栈      |
+| 90  | 239     | 滑动窗口最大值     | Hard   | 单调队列    |
+| 91  | 136     | 只出现一次的数     | Easy   | 异或        |
+| 92  | 338     | 比特位计数         | Easy   | 位运算 DP   |
+| 93  | 560     | 和为K的子数组      | Medium | 前缀和+哈希 |
+| 94  | 238     | 除自身以外乘积     | Medium | 前缀/后缀积 |
+| 95  | 1094    | 拼车               | Medium | 差分        |
+| 96  | 307     | 区域和检索(可修改) | Medium | BIT/线段树  |
+| 97  | 315     | 右侧小于当前元素   | Hard   | BIT+离散化  |
+| 98  | 218     | 天际线问题         | Hard   | 扫描线+堆   |
+| 99  | 312     | 戳气球             | Hard   | 区间 DP     |
+| 100 | 10      | 正则表达式匹配     | Hard   | DP          |
 
 ---
 
