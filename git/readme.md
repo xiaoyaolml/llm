@@ -4,7 +4,7 @@
 
 ```bash
 # 1. 生成新密钥（推荐 ed25519）
-ssh-keygen -t ed25519 -C "your_email@example.com"
+ssh-keygen -t ed25519 -C "xiaoyaolml@163.com"
 # 一路回车即可
 
 # 2. 查看公钥
