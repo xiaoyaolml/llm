@@ -1,267 +1,75 @@
 {
-  "report_id": "FIN-OPT-{{timestamp}}",
-  "metadata": {
-    "generated_at": "{{timestamp_iso}}",
-    "tool_version": "Claude Code v2.1 /finance-optim v1.0",
+  "report_id": "{{skill}}-{{timestamp}}",
+  "skill": "finance-optim",
+  "generated_at": "{{timestamp_iso}}",
+  "target": {
     "repository": "{{repository}}",
     "branch": "{{branch}}",
-    "commit_hash": "{{commit_hash}}"
+    "commit": "{{commit_hash}}",
+    "scope": "{{scope}}",
+    "path": "{{target_path}}"
   },
-  "performance_targets": {
-    "latency": {
-      "target_us": {{latency_target}},
-      "current_us": {{current_latency}},
-      "unit": "microseconds"
-    },
-    "throughput": {
-      "target_tps": {{throughput_target}},
-      "current_tps": {{current_throughput}},
-      "unit": "transactions_per_second"
-    },
-    "memory": {
-      "target_mb": {{memory_target}},
-      "current_mb": {{memory_usage}},
-      "unit": "megabytes"
+  "summary": {
+    "status": "{{status}}",
+    "decision": "{{decision}}",
+      "files_changed": "{{files_changed}}",
+      "blocking_count": "{{blocking_count}}",
+      "non_blocking_count": "{{non_blocking_count}}"
+  },
+  "domain_context": {
+    "system_type": "{{system_type}}",
+    "workload": "{{workload}}",
+    "latency_budget": "{{latency_budget}}",
+    "throughput_target": "{{throughput_target}}"
+  },
+  "blocking_issues": [
+    {
+      "id": "{{issue_id}}",
+      "category": "performance",
+      "severity": "critical",
+      "file": "{{file_path}}",
+      "line": "{{line_number}}",
+      "title": "{{title}}",
+      "risk": "{{risk}}",
+      "evidence": "{{evidence}}",
+      "recommendation": "{{recommendation}}",
+      "expected_gain": "{{expected_gain}}"
     }
-  },
-  "issues": {
-    "high_severity": [
-      {
-        "id": {{issue_id}},
-        "file": "{{file_path}}",
-        "line_number": {{line_number}},
-        "function": "{{function_name}}",
-        "title": "{{issue_title}}",
-        "description": "{{detailed_description}}",
-        "current_code": "{{current_code_snippet}}",
-        "optimized_code": "{{optimized_code_snippet}}",
-        "expected_improvement": {
-          "latency_reduction_us": {{latency_reduction}},
-          "throughput_improvement_percent": {{throughput_improvement}},
-          "memory_reduction_mb": {{memory_reduction}}
-        },
-        "risk_level": "high",
-        "validation_command": "{{validation_command}}"
-      }
-    ],
-    "medium_severity": [
-      {
-        "id": {{issue_id}},
-        "file": "{{file_path}}",
-        "line_number": {{line_number}},
-        "title": "{{issue_title}}",
-        "description": "{{description}}",
-        "optimization_suggestion": "{{optimization_code}}",
-        "expected_gain_percent": {{performance_gain}},
-        "difficulty": {{difficulty_level}},
-        "risk_level": "medium"
-      }
-    ],
-    "low_severity": [
-      {
-        "id": {{issue_id}},
-        "file": "{{file_path}}",
-        "line_number": {{line_number}},
-        "description": "{{description}}",
-        "benefit": "{{benefit_description}}",
-        "risk_level": "low"
-      }
-    ]
-  },
-  "optimization_suggestions": {
-    "architecture": [
-      {
-        "title": "{{suggestion_title}}",
-        "description": "{{detailed_description}}",
-        "expected_gain_percent": {{expected_gain}},
-        "implementation_complexity": "{{complexity_level}}",
-        "priority": "high"
-      }
-    ],
-    "algorithm": [
-      {
-        "algorithm_name": "{{algorithm_name}}",
-        "current_complexity": "{{current_complexity}}",
-        "target_complexity": "{{target_complexity}}",
-        "description": "{{description}}",
-        "expected_improvement": "{{improvement_description}}"
-      }
-    ],
-    "data_structures": [
-      {
-        "structure_name": "{{structure_name}}",
-        "current_structure": "{{current_structure}}",
-        "recommended_structure": "{{recommended_structure}}",
-        "benefits": "{{benefits_description}}",
-        "migration_difficulty": "{{difficulty}}"
-      }
-    ]
-  },
-  "expected_improvements": {
-    "summary": {
-      "overall_improvement_percent": {{overall_improvement}},
-      "latency_improvement_percent": {{latency_improvement}},
-      "throughput_improvement_percent": {{throughput_improvement}},
-      "memory_improvement_percent": {{memory_improvement}}
-    },
-    "detailed_metrics": {
-      "p99_latency": {
-        "current_us": {{current_p99}},
-        "target_us": {{target_p99}},
-        "improvement_percent": {{latency_improvement}}
-      },
-      "throughput": {
-        "current_tps": {{current_tps}},
-        "target_tps": {{target_tps}},
-        "improvement_percent": {{throughput_improvement}}
-      },
-      "memory_usage": {
-        "current_mb": {{current_memory}},
-        "target_mb": {{target_memory}},
-        "improvement_percent": {{memory_improvement}}
-      },
-      "cpu_utilization": {
-        "current_percent": {{current_cpu}},
-        "target_percent": {{target_cpu}},
-        "improvement_percent": {{cpu_improvement}}
-      }
+  ],
+  "non_blocking_issues": [
+    {
+      "id": "{{issue_id}}",
+      "category": "performance",
+      "severity": "medium",
+      "file": "{{file_path}}",
+      "line": "{{line_number}}",
+      "title": "{{title}}",
+      "risk": "{{risk}}",
+      "evidence": "{{evidence}}",
+      "recommendation": "{{recommendation}}",
+      "expected_gain": "{{expected_gain}}"
     }
-  },
-  "risk_assessment": {
-    "high_risk_changes": [
-      {
-        "change_description": "{{change_description}}",
-        "potential_risk": "{{risk_description}}",
-        "mitigation_strategy": "{{mitigation_strategy}}",
-        "testing_requirement": "{{testing_requirement}}"
-      }
-    ],
-    "medium_risk_changes": [
-      {
-        "change_description": "{{change_description}}",
-        "testing_requirement": "{{testing_requirement}}",
-        "rollback_plan": "{{rollback_plan}}"
-      }
-    ],
-    "low_risk_changes": [
-      {
-        "change_description": "{{change_description}}",
-        "safe_to_implement": true
-      }
-    ]
-  },
-  "implementation_plan": {
-    "phase_1": {
-      "name": "Critical Fixes (1-2 days)",
-      "priority": "high",
-      "tasks": [
-        {
-          "id": 1,
-          "description": "{{task_description}}",
-          "owner": "{{owner}}",
-          "estimated_time_hours": {{time_estimate}},
-          "dependencies": [],
-          "success_criteria": "{{success_criteria}}"
-        }
-      ]
-    },
-    "phase_2": {
-      "name": "Performance Improvements (3-5 days)",
-      "priority": "medium",
-      "tasks": [
-        {
-          "id": 2,
-          "description": "{{task_description}}",
-          "owner": "{{owner}}",
-          "estimated_time_hours": {{time_estimate}},
-          "dependencies": [1],
-          "success_criteria": "{{success_criteria}}"
-        }
-      ]
-    },
-    "phase_3": {
-      "name": "Architecture Optimization (1+ weeks)",
-      "priority": "low",
-      "tasks": [
-        {
-          "id": 3,
-          "description": "{{task_description}}",
-          "owner": "{{owner}}",
-          "estimated_time_hours": {{time_estimate}},
-          "dependencies": [2],
-          "success_criteria": "{{success_criteria}}"
-        }
-      ]
+  ],
+  "evidence_sources": [
+    {
+      "type": "benchmark|profile|trace|metric",
+      "reference": "{{reference}}",
+      "note": "{{note}}"
     }
-  },
-  "validation_plan": {
-    "performance_tests": [
-      {
-        "test_name": "Latency Test",
-        "command": "./latency_test --target {{target_latency}}us --duration 60s",
-        "success_criteria": "P99 latency < {{target_latency}}μs",
-        "metrics_to_collect": ["p50_latency", "p99_latency", "p999_latency"]
-      },
-      {
-        "test_name": "Throughput Test",
-        "command": "./throughput_test --target {{target_tps}}tps --concurrency 100",
-        "success_criteria": "Sustained throughput > {{target_tps}} TPS",
-        "metrics_to_collect": ["transactions_per_second", "error_rate"]
-      },
-      {
-        "test_name": "Stress Test",
-        "command": "./stress_test --max-load 200% --duration 300s",
-        "success_criteria": "System remains stable under 2x load",
-        "metrics_to_collect": ["cpu_utilization", "memory_usage", "error_rate"]
-      }
-    ],
-    "correctness_tests": [
-      {
-        "test_name": "Numerical Accuracy",
-        "test_case": "TEST_F(PerformanceTest, PricingAccuracy)",
-        "success_criteria": "ASSERT_NEAR(expected, actual, 1e-6)",
-        "description": "Verify financial calculations maintain precision"
-      },
-      {
-        "test_name": "Concurrency Safety",
-        "test_case": "TEST_F(ConcurrencyTest, ThreadSafety)",
-        "success_criteria": "ASSERT_EQ(expected_count, actual_count)",
-        "description": "Verify thread safety under concurrent access"
-      }
-    ]
-  },
-  "recommendations": {
-    "immediate_actions": [
-      "{{immediate_action_1}}",
-      "{{immediate_action_2}}",
-      "{{immediate_action_3}}"
-    ],
-    "long_term_improvements": [
-      "{{long_term_suggestion_1}}",
-      "{{long_term_suggestion_2}}",
-      "{{long_term_suggestion_3}}"
-    ],
-    "tools_and_resources": {
-      "profiling_tools": [
-        "Intel VTune",
-        "perf",
-        "gperftools"
-      ],
-      "memory_tools": [
-        "Valgrind",
-        "AddressSanitizer"
-      ],
-      "concurrency_tools": [
-        "ThreadSanitizer",
-        "Helgrind"
-      ],
-      "documentation": [
-        "https://internal-docs.company.com/performance",
-        "https://github.com/lefticus/cppbestpractices"
-      ]
+  ],
+  "validation_plan": [
+    {
+      "name": "{{validation_name}}",
+      "goal": "{{validation_goal}}",
+      "method": "{{validation_method}}",
+      "success_criteria": "{{success_criteria}}"
     }
-  },
-  "confidence_score": {{confidence_score}},
-  "review_status": "{{review_status}}",
-  "next_review_date": "{{next_review_date}}"
+  ],
+  "follow_up": [
+    {
+      "priority": "{{priority}}",
+      "action": "{{action}}",
+      "owner": "{{owner}}"
+    }
+  ]
 }

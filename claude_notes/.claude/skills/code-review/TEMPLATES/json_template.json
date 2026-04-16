@@ -1,33 +1,72 @@
 {
-  "review_report": {
+  "report_id": "{{skill}}-{{timestamp}}",
+  "skill": "code-review",
+  "generated_at": "{{timestamp_iso}}",
+  "target": {
+    "repository": "{{repository}}",
     "branch": "{{branch}}",
-    "timestamp": "{{timestamp}}",
-    "summary": {
-      "files_changed": {{file_count}},
-      "additions": {{additions}},
-      "deletions": {{deletions}},
-      "total_issues": {{total_issues}},
-      "high_severity": {{high_count}},
-      "medium_severity": {{medium_count}},
-      "low_severity": {{low_count}}
-    },
-    "issues": [
-      {
-        "id": 1,
-        "file": "path/to/file.cpp",
-        "line": 42,
-        "description": "问题描述",
-        "severity": "high",
-        "category": "security",
-        "suggestion": "修改建议",
-        "code_before": "有问题的代码片段",
-        "code_after": "修复后的代码片段"
-      }
-    ],
-    "recommendation": "{{recommendation}}",
-    "next_steps": [
-      "步骤1",
-      "步骤2"
-    ]
-  }
+    "commit": "{{commit_hash}}",
+    "scope": "{{scope}}",
+    "path": "{{target_path}}"
+  },
+  "summary": {
+    "status": "{{status}}",
+    "decision": "{{decision}}",
+      "files_changed": "{{files_changed}}",
+      "blocking_count": "{{blocking_count}}",
+      "non_blocking_count": "{{non_blocking_count}}"
+  },
+  "domain_context": {
+    "system_type": "{{system_type}}",
+    "workload": "{{workload}}",
+    "notes": "{{context_notes}}"
+  },
+  "blocking_issues": [
+    {
+      "id": "{{issue_id}}",
+      "category": "{{category}}",
+      "severity": "critical",
+      "file": "{{file_path}}",
+      "line": "{{line_number}}",
+      "title": "{{title}}",
+      "risk": "{{risk}}",
+      "evidence": "{{evidence}}",
+      "recommendation": "{{recommendation}}"
+    }
+  ],
+  "non_blocking_issues": [
+    {
+      "id": "{{issue_id}}",
+      "category": "{{category}}",
+      "severity": "medium",
+      "file": "{{file_path}}",
+      "line": "{{line_number}}",
+      "title": "{{title}}",
+      "risk": "{{risk}}",
+      "evidence": "{{evidence}}",
+      "recommendation": "{{recommendation}}"
+    }
+  ],
+  "evidence_sources": [
+    {
+      "type": "diff|test|log|metric|trace|benchmark",
+      "reference": "{{reference}}",
+      "note": "{{note}}"
+    }
+  ],
+  "validation_plan": [
+    {
+      "name": "{{validation_name}}",
+      "goal": "{{validation_goal}}",
+      "method": "{{validation_method}}",
+      "success_criteria": "{{success_criteria}}"
+    }
+  ],
+  "follow_up": [
+    {
+      "priority": "{{priority}}",
+      "action": "{{action}}",
+      "owner": "{{owner}}"
+    }
+  ]
 }
