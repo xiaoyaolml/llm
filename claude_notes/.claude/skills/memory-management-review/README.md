@@ -1,16 +1,30 @@
 # memory-management-review
 
-该 Skill 专注于 C++ 内存管理、生命周期、资源释放、对象池与分配策略。
+## 定位
 
-## 当前目录
+C++ 内存管理专项 Skill，聚焦所有权、分配与回收、资源释放、对象池、碎片化和内存热点。
 
-- `SKILL.md`：主技能定义
-- `CHECKLISTS/`：内存检查清单
-- `EXAMPLES/`：使用示例
-- `TEMPLATES/`：模板占位目录
+## 适用场景
 
-## 建议边界
+- 排查泄漏、悬垂、重复释放、越界
+- 审查对象池、内存池、分配器和缓存结构
+- 审查高频路径的分配与回收行为
 
-- 与 `cpp-backend-review` 的通用 C++ 规则互补
-- 与 `concurrency-review` 的共享状态问题互补
-- 与 `performance-bottleneck-identification` 的热点定位互补
+## 核心关注点
+
+- 所有权与生命周期是否清晰
+- RAII 与异常路径释放是否完整
+- 分配频率、对象复用、碎片化风险
+- 对齐、局部性、伪共享与回收成本
+
+## 目录说明
+
+- `SKILL.md`：技能定义与输出要求
+- `CHECKLISTS/`：内存管理清单
+- `EXAMPLES/`：典型问题与用法示例
+- `TEMPLATES/`：报告模板占位目录
+
+## 协作边界
+
+- 并发回收和共享状态问题可联动 `concurrency-review`
+- 服务端整体语义问题可联动 `cpp-backend-review`

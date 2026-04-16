@@ -1,73 +1,30 @@
-# 数据库交互优化技能 (database-interaction-optimization)
+# database-interaction-optimization
 
-## 🚀 快速开始
+## 定位
 
-### 安装
-```bash
-# 技能已安装在 ~/.claude/skills/database-interaction-optimization/
-# 重启 Claude Code 使技能生效
-claude restart
-```
+数据库交互优化 Skill，聚焦查询模式、索引使用、连接池、批处理、事务边界和依赖放大问题。
 
-### 首次使用
-```bash
-# 执行数据库交互优化审查
-claude /database-interaction-optimization src/database/
+## 适用场景
 
-# 指定审查维度
-claude /database-interaction-optimization src/database/ --dimension query-optimization
+- 慢查询、锁等待、连接池饱和
+- 写放大、批处理不合理、事务过大
+- 服务端关键路径涉及数据库交互
 
-# 输出JSON格式报告
-claude /database-interaction-optimization src/database/ --output json
+## 核心关注点
 
-# 详细模式
-claude /database-interaction-optimization src/database/ --verbose
-```
+- 查询与索引是否匹配
+- 事务与锁等待成本
+- 连接池与重试策略
+- 批量读写、缓存和数据访问放大
 
-## ✨ 核心功能
+## 目录说明
 
-- **连接池管理**：验证连接获取释放机制、优化池大小配置
-- **查询优化**：分析慢查询、建议缺失索引、解决N+1问题
-- **事务管理**：检查事务边界、验证隔离级别、评估回滚机制
-- **缓存策略**：评估缓存命中率、验证缓存一致性机制
-- **索引优化**：分析查询计划、推荐复合索引、检查索引碎片
-- **读写分离**：验证主从同步机制、检查负载均衡策略
-- **数据分片**：评估分片策略合理性、优化跨分片查询
+- `SKILL.md`：技能定义与输出要求
+- `CHECKLISTS/`：数据库交互清单
+- `EXAMPLES/`：示例
+- `TEMPLATES/`：模板占位目录
 
-## 📚 使用示例
+## 协作边界
 
-### 1. 查询性能优化
-```bash
-# 识别和优化慢查询
-claude /database-interaction-optimization src/queries/ --dimension query-optimization --verbose
-```
-
-### 2. 连接池配置优化
-```bash
-# 优化高频交易系统的连接池参数
-claude /database-interaction-optimization src/pool/ --dimension connection-pool --system-type hft
-```
-
-### 3. 缓存策略评估
-```bash
-# 评估热点数据缓存有效性
-claude /database-interaction-optimization src/cache/ --dimension caching --target hot-data
-```
-
-## 🔌 集成指南
-
-### CI/CD 集成
-```yaml
-- name: Database Interaction Review
-  run: claude /database-interaction-optimization src/ --output json > db_report.json
-```
-
-### 预提交钩子
-```bash
-#!/bin/sh
-claude /database-interaction-optimization --high-priority-only || exit 1
-```
-
-## 📅 版本历史
-
-- **v1.0.0 (2026-04-09)**: 初始版本，包含数据库交互核心优化功能
+- 通用瓶颈定位可联动 `performance-bottleneck-identification`
+- 数据质量和语义问题可联动 `risk-check` 或 `market-data-validate`

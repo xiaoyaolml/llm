@@ -1,77 +1,30 @@
-# 金融级安全标准代码审查技能 (security-review)
+# security-review
 
-## 🚀 快速开始
+## 定位
 
-### 安装
-```bash
-# 技能已安装在 ~/.claude/skills/security-review/
-# 重启 Claude Code 使技能生效
-claude restart
-```
+安全审查 Skill，聚焦输入验证、认证授权、敏感信息、审计、依赖风险和配置暴露面。
 
-### 首次使用
-```bash
-# 执行安全审查
-claude /security-review src/
+## 适用场景
 
-# 指定审查维度
-claude /security-review src/ --dimension authentication
+- 身份认证、授权、会话、密钥管理改动
+- 对外接口、输入处理、配置安全审查
+- 上线前安全评估或事故复盘
 
-# 指定安全标准
-claude /security-review src/ --standard pci-dss
+## 核心关注点
 
-# 输出JSON格式报告
-claude /security-review src/ --output json
+- 注入、越权、敏感信息泄露
+- 密钥、令牌、凭据和加密使用
+- 审计日志、异常行为和追踪
+- 依赖风险与默认配置安全
 
-# 详细模式
-claude /security-review src/ --verbose
-```
+## 目录说明
 
-## ✨ 核心功能
+- `SKILL.md`：技能定义与输出要求
+- `CHECKLISTS/`：安全检查清单
+- `EXAMPLES/`：安全审查示例
+- `TEMPLATES/`：模板占位目录
 
-- **输入验证安全**: 检测SQL注入、XSS、命令注入漏洞
-- **身份认证安全**: 验证密码策略、MFA、JWT安全使用
-- **访问控制安全**: 审查RBAC权限模型、越权漏洞
-- **数据保护安全**: 检查加密存储、传输安全、数据脱敏
-- **加密安全**: 验证算法选择、密钥管理安全
-- **会话管理安全**: 检查会话超时、固定攻击防护
-- **业务逻辑安全**: 检测交易逻辑漏洞、金额计算问题
-- **合规性检查**: PCI-DSS、GDPR、SOX等标准合规验证
+## 协作边界
 
-## 📚 使用示例
-
-### 1. 支付系统安全审查
-```bash
-# 审查支付系统PCI-DSS合规性
-claude /security-review src/payments/ --standard pci-dss --verbose
-```
-
-### 2. 身份认证安全验证
-```bash
-# 检查JWT令牌实现安全性
-claude /security-review src/auth/ --dimension authentication --target jwt
-```
-
-### 3. 敏感数据保护检查
-```bash
-# 验证用户密码存储加密方式
-claude /security-review src/users/ --dimension data-protection --target password-storage
-```
-
-## 🔌 集成指南
-
-### CI/CD 集成
-```yaml
-- name: Security Review
-  run: claude /security-review src/ --output json > security_report.json
-```
-
-### 预提交钩子
-```bash
-#!/bin/sh
-claude /security-review --high-priority-only || exit 1
-```
-
-## 📅 版本历史
-
-- **v1.0.0 (2026-04-09)**: 初始版本，包含金融系统安全审查核心功能
+- 合规控制与审计要求可联动 `compliance-review`
+- 协议与 API 暴露面可联动 `protocol-validate` 或 `api-design-review`

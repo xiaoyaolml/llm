@@ -1,72 +1,32 @@
-# C++后端专项审查技能 (cpp-backend-review)
+# cpp-backend-review
 
-## 🚀 快速开始
+## 定位
 
-### 安装
-```bash
-# 技能已安装在 ~/.claude/skills/cpp-backend-review/
-# 重启 Claude Code 使技能生效
-claude restart
-```
+C++ 服务端专项审查 Skill，聚焦所有权、生命周期、接口设计、并发模型、资源管理和热路径行为。
 
-### 首次使用
-```bash
-# 执行C++后端专项审查
-claude /cpp-backend-review src/backend/
+## 适用场景
 
-# 指定审查维度
-claude /cpp-backend-review src/backend/ --dimension memory-management
+- 审查 C++ 服务端模块或 PR
+- 审查网络、RPC、线程池、配置、日志、存储路径
+- 做服务端整体质量评估
 
-# 输出JSON格式报告
-claude /cpp-backend-review src/backend/ --output json
+## 核心关注点
 
-# 详细模式
-claude /cpp-backend-review src/backend/ --verbose
-```
+- 所有权与 RAII
+- API 与模块边界
+- 错误处理、日志与可观测性
+- 线程安全与 shutdown 行为
+- 热路径分配、拷贝和锁使用
 
-## ✨ 核心功能
+## 目录说明
 
-- **内存管理**：检测内存泄漏、检查智能指针使用
-- **线程安全**：验证无锁编程、检查线程同步机制
-- **性能优化**：分析函数调用开销、优化内存布局
-- **异常处理**：审查异常安全保证、检查RAII实践
-- **模板编程**：验证SFINAE应用、检查编译期优化
-- **C++20特性**：评估协程、概念、模块等新特性使用
+- `SKILL.md`：技能定义与输出要求
+- `CHECKLISTS/`：通用规则、线程安全、内存管理清单
+- `EXAMPLES/`：服务端使用示例
+- `TEMPLATES/`：模板占位目录
 
-## 📚 使用示例
+## 协作边界
 
-### 1. 内存管理审查
-```bash
-# 深度检查内存使用模式
-claude /cpp-backend-review src/memory/ --dimension memory-management --verbose
-```
-
-### 2. 线程安全验证
-```bash
-# 评估高频交易系统并发安全性
-claude /cpp-backend-review src/concurrency/ --dimension thread-safety --system-type hft
-```
-
-### 3. C++20特性审查
-```bash
-# 检查协程实现的正确性
-claude /cpp-backend-review src/coroutines/ --dimension cpp20-features --feature coroutines
-```
-
-## 🔌 集成指南
-
-### CI/CD 集成
-```yaml
-- name: C++ Backend Review
-  run: claude /cpp-backend-review src/ --output json > cpp_backend_report.json
-```
-
-### 预提交钩子
-```bash
-#!/bin/sh
-claude /cpp-backend-review --high-priority-only || exit 1
-```
-
-## 📅 版本历史
-
-- **v1.0.0 (2026-04-09)**: 初始版本，包含C++后端核心审查功能
+- 深度并发问题交给 `concurrency-review`
+- 深度内存问题交给 `memory-management-review`
+- 性能定位交给 `performance-bottleneck-identification`

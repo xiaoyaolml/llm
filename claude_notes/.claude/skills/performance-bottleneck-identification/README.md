@@ -1,73 +1,31 @@
-# 性能瓶颈识别技能 (performance-bottleneck-identification)
+# performance-bottleneck-identification
 
-## 🚀 快速开始
+## 定位
 
-### 安装
-```bash
-# 技能已安装在 ~/.claude/skills/performance-bottleneck-identification/
-# 重启 Claude Code 使技能生效
-claude restart
-```
+性能瓶颈识别 Skill，负责跨 CPU、内存、I/O、网络、数据库、并发与缓存维度定位热点和排序优化优先级。
 
-### 首次使用
-```bash
-# 执行性能瓶颈识别
-claude /performance-bottleneck-identification src/
+## 适用场景
 
-# 指定审查维度
-claude /performance-bottleneck-identification src/ --dimension memory
+- 性能退化、吞吐下降、尾延迟升高
+- 不确定瓶颈究竟在代码、系统还是依赖侧
+- 需要先做证据驱动的问题定位
 
-# 输出JSON格式报告
-claude /performance-bottleneck-identification src/ --output json
+## 核心关注点
 
-# 详细模式
-claude /performance-bottleneck-identification src/ --verbose
-```
+- 热点证据而非主观猜测
+- CPU、内存、I/O、网络、数据库的放大链路
+- 锁争用、队列积压、缓存失配
+- 优化收益、风险与验证顺序
 
-## ✨ 核心功能
+## 目录说明
 
-- **CPU瓶颈**：识别热点函数、评估算法复杂度
-- **内存瓶颈**：检测内存泄漏、分析内存碎片
-- **I/O瓶颈**：评估磁盘性能、优化文件访问模式
-- **网络瓶颈**：检查延迟和带宽、优化协议使用
-- **数据库瓶颈**：分析慢查询、验证索引使用
-- **并发瓶颈**：检查线程竞争、优化锁使用
-- **缓存瓶颈**：评估命中率、优化缓存策略
+- `SKILL.md`：技能定义与输出要求
+- `CHECKLISTS/`：瓶颈识别清单
+- `EXAMPLES/`：示例
+- `TEMPLATES/`：调查模板占位目录
 
-## 📚 使用示例
+## 协作边界
 
-### 1. 高频交易系统分析
-```bash
-# 识别交易引擎性能瓶颈
-claude /performance-bottleneck-identification src/engine/ --system-type hft --verbose
-```
-
-### 2. 内存泄漏检测
-```bash
-# 检测市场数据缓存内存问题
-claude /performance-bottleneck-identification src/cache/ --dimension memory --scenario leak-detection
-```
-
-### 3. 数据库性能分析
-```bash
-# 优化订单查询性能
-claude /performance-bottleneck-identification src/db/ --dimension database --target order-query
-```
-
-## 🔌 集成指南
-
-### CI/CD 集成
-```yaml
-- name: Performance Bottleneck Identification
-  run: claude /performance-bottleneck-identification src/ --output json > perf_report.json
-```
-
-### 定期性能监控
-```bash
-# 每日自动运行瓶颈识别
-0 3 * * * claude /performance-bottleneck-identification src/ --high-priority-only
-```
-
-## 📅 版本历史
-
-- **v1.0.0 (2026-04-09)**: 初始版本，包含核心性能瓶颈识别功能
+- 若瓶颈已明确在并发路径，可转 `concurrency-review`
+- 若瓶颈已明确在网络层，可转 `network-optimization`
+- 若瓶颈已明确在数据库侧，可转 `database-interaction-optimization`

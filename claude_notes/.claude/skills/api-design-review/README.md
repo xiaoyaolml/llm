@@ -1,73 +1,30 @@
-# 金融API接口设计规范审查技能 (api-design-review)
+# api-design-review
 
-## 🚀 快速开始
+## 定位
 
-### 安装
-```bash
-# 技能已安装在 ~/.claude/skills/api-design-review/
-# 重启 Claude Code 使技能生效
-claude restart
-```
+API 设计审查 Skill，聚焦接口边界、输入输出契约、版本策略、错误模型、一致性和可演进性。
 
-### 首次使用
-```bash
-# 执行API设计审查
-claude /api-design-review src/api/
+## 适用场景
 
-# 指定审查维度
-claude /api-design-review src/api/ --dimension versioning
+- 新增 API 或修改请求/响应结构
+- 错误码、分页、幂等性、兼容性评审
+- 服务间接口治理
 
-# 输出JSON格式报告
-claude /api-design-review src/api/ --output json
+## 核心关注点
 
-# 详细模式
-claude /api-design-review src/api/ --verbose
-```
+- 合同清晰度和一致性
+- 版本与兼容策略
+- 错误码与语义稳定性
+- 调用方迁移成本和测试覆盖
 
-## ✨ 核心功能
+## 目录说明
 
-- **RESTful设计**：验证资源命名、HTTP方法使用
-- **版本管理**：检查API版本控制策略
-- **错误处理**：评估错误码规范、错误信息标准化
-- **安全性**：审查认证授权机制、敏感信息保护
-- **兼容性**：验证向后兼容性设计
-- **文档完整性**：评估OpenAPI/Swagger文档质量
-- **限流策略**：检查速率限制机制
+- `SKILL.md`：技能定义与输出要求
+- `CHECKLISTS/`：API 清单
+- `EXAMPLES/`：使用示例
+- `TEMPLATES/`：模板占位目录
 
-## 📚 使用示例
+## 协作边界
 
-### 1. RESTful规范审查
-```bash
-# 检查RESTful API设计合规性
-claude /api-design-review src/rest/ --dimension restful-standards --verbose
-```
-
-### 2. 版本管理验证
-```bash
-# 评估API版本控制实施
-claude /api-design-review src/version/ --dimension versioning
-```
-
-### 3. 金融交易API安全审查
-```bash
-# 验证订单API安全性
-claude /api-design-review src/orders/ --dimension security --target trading
-```
-
-## 🔌 集成指南
-
-### CI/CD 集成
-```yaml
-- name: API Design Review
-  run: claude /api-design-review src/ --output json > api_report.json
-```
-
-### 预提交钩子
-```bash
-#!/bin/sh
-claude /api-design-review --high-priority-only || exit 1
-```
-
-## 📅 版本历史
-
-- **v1.0.0 (2026-04-09)**: 初始版本，包含金融API设计核心审查功能
+- 协议层细节可联动 `protocol-validate`
+- 安全边界可联动 `security-review`

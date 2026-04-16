@@ -1,72 +1,30 @@
-# 机器学习模型验证技能 (ml-model-validate)
+# ml-model-validate
 
-## 🚀 快速开始
+## 定位
 
-### 安装
-```bash
-# 技能已安装在 ~/.claude/skills/ml-model-validate/
-# 重启 Claude Code 使技能生效
-claude restart
-```
+模型验证 Skill，聚焦训练/推理一致性、特征工程、数据泄漏、漂移、偏差和线上监控。
 
-### 首次使用
-```bash
-# 执行模型验证
-claude /ml-model-validate src/models/
+## 适用场景
 
-# 指定验证维度
-claude /ml-model-validate src/models/ --dimension feature-engineering
+- 训练和推理链路审查
+- 模型效果异常、漂移或稳定性下降
+- 上线前做模型验证复核
 
-# 输出JSON格式报告
-claude /ml-model-validate src/models/ --output json
+## 核心关注点
 
-# 详细模式
-claude /ml-model-validate src/models/ --verbose
-```
+- 数据与标签质量
+- 特征工程一致性和泄漏
+- 指标选择、漂移和偏差
+- 线上监控与回归验证
 
-## ✨ 核心功能
+## 目录说明
 
-- **模型验证**：检查模型输入输出规范
-- **特征工程**：验证特征选择和处理流程
-- **模型漂移**：检测数据分布变化
-- **公平性检查**：评估模型偏见风险
-- **过拟合检测**：识别过度拟合风险
-- **精度验证**：确认模型预测精度
+- `SKILL.md`：技能定义与输出要求
+- `CHECKLISTS/`：模型规则摘要
+- `EXAMPLES/`：示例
+- `TEMPLATES/`：模板占位目录
 
-## 📚 使用示例
+## 协作边界
 
-### 1. 基础模型验证
-```bash
-# 检查所有模型
-claude /ml-model-validate src/models/
-```
-
-### 2. 特征工程审查
-```bash
-# 详细审查特征工程实现
-claude /ml-model-validate src/features/ --dimension feature-engineering --verbose
-```
-
-### 3. 模型漂移检测
-```bash
-# 监控生产环境模型漂移
-claude /ml-model-validate production/models/ --dimension drift-detection --baseline historical_data
-```
-
-## 🔌 集成指南
-
-### CI/CD 集成
-```yaml
-- name: Run Model Validation
-  run: claude /ml-model-validate src/models/ --output json > model_report.json
-```
-
-### 预提交钩子
-```bash
-#!/bin/sh
-claude /ml-model-validate --high-priority-only || exit 1
-```
-
-## 📅 版本历史
-
-- **v1.0.0 (2026-04-09)**: 初始版本，包含基础模型验证功能
+- 风险口径问题可联动 `risk-check`
+- 线上可观测性问题可联动 `system-monitoring`

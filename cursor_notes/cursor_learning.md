@@ -2100,3 +2100,86 @@ project/
 > Claude Skills 里的“稳定约束”进入 Cursor Rules；
 > “流程化审查方法”进入 Playbooks；
 > “专项低频任务”进入 Prompt 模板。
+
+---
+
+## 19. 当前仓库已补的审查任务与 PR 模板
+
+为了让这些规则和 Playbooks 真正可执行，当前仓库还新增了两层落地资产。
+
+### 19.1 可执行审查脚本
+
+- `scripts/review/export_pr_snapshot.py`
+- `scripts/review/generate_review_prompt.py`
+- `scripts/review/repo_delivery_audit.py`
+- `scripts/review/README.md`
+
+这些脚本的目标是：
+
+- 导出当前 PR / diff 审查上下文
+- 自动生成适合发给 Cursor 的审查 Prompt
+- 对仓库做可交付性检查
+
+### 19.2 VS Code 审查任务
+
+当前 `.vscode/tasks.json` 已增加：
+
+- 导出 PR snapshot
+- 生成通用 C++ PR 审查 Prompt
+- 生成并发 Prompt
+- 生成性能 Prompt
+- 生成安全 Prompt
+- 生成风险 / 协议 Prompt
+- 生成仓库交付审查报告
+
+### 19.3 C++ 服务端 PR 审查模板
+
+新增目录：`cursor_notes/pr_review_templates/`
+
+包括：
+
+- `cpp-backend-general.md`
+- `cpp-backend-concurrency.md`
+- `cpp-backend-performance.md`
+- `cpp-backend-security-protocol.md`
+
+这几份模板适合在以下场景直接复用：
+
+- PR 评审
+- 架构变更评审
+- 高风险上线前复核
+- 并发 / 性能 / 安全专项审查
+
+---
+
+## 20. Claude Skills 与 Cursor 文档的持续对齐建议
+
+本轮已确认：`cursor_notes/` 仍然需要持续更新，原因有两点。
+
+### 20.1 Claude Skills 已经发生结构性收敛
+
+现在 Claude Skills 已经不再是简单的平铺集合，而是更适合按以下三层理解：
+
+- **核心**：高频使用、优先维护
+- **专项**：按主题深入
+- **按需**：只在仓库确有该领域时启用
+
+因此 Cursor 侧文档也应保持同样的分层意识。
+
+### 20.2 Claude Skills 的支持文档风格已统一
+
+现在其支持内容已经逐步统一为：
+
+- `CHECKLISTS/`：使用时机 + 关键检查项
+- `EXAMPLES/`：示例输入 + 期望输出
+- `TEMPLATES/`：最小可复用模板
+
+这意味着 Cursor 侧不应回退到早期那种“长篇命令说明 + 大量重复 CLI 示例”的写法。
+
+### 20.3 后续优先补哪些 `cursor_notes`
+
+建议优先补：
+
+1. 核心 Skill 与 Cursor Playbooks 的对应速查表
+2. 按问题类型选择 Skill / Playbook / Prompt 的快速导航页
+3. 一个更短的“Cursor 审查工作流速记版”

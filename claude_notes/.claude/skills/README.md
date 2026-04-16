@@ -4,6 +4,10 @@
 > 建议优先参考 `REVIEW_AND_OPTIMIZATION.md` 中的收敛分组、去重建议和 Cursor 迁移方案，
 > 不建议继续按 1:1 方式扩展高度重叠的同类 Skills。
 
+> 目录结构统一标准见 `STANDARD_STRUCTURE.md`。
+> 分层索引见 `LAYERED_INDEX.md`，快速导航见 `COMPACT_GUIDE.md`。
+> 支持文档风格约定见 `SUPPORT_DOC_STYLE.md`。
+
 ## 📁 已创建的技能 (20个)
 
 ```
@@ -75,6 +79,14 @@
 6. **按需专项**：`ml-model-validate`、`defi-protocol-review`
 
 > 这 6 组也更适合迁移到 Cursor：稳定规则放 Rules，流程化内容放 Playbooks，强领域专项放 Prompt 模板。
+
+### 📚 当前维护建议
+
+- `README.md` 保持“定位 + 边界 + 场景”风格
+- `SKILL.md` 保持“目标 + 输入 + 输出 + 协作边界”风格
+- `CHECKLISTS/` 保持“使用时机 + 关键检查项”风格
+- `EXAMPLES/` 保持“示例输入 + 期望输出”风格
+- `TEMPLATES/` 保持“最小可复用模板”风格
 
 ### 🟡 场景化使用建议
 
