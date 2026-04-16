@@ -1,0 +1,18 @@
+---
+description: "Architecture and layering constraints for service modules"
+alwaysApply: false
+globs:
+  - "src/**/*.h"
+  - "src/**/*.hpp"
+  - "src/**/*.cc"
+  - "src/**/*.cpp"
+  - "include/**/*.h"
+  - "include/**/*.hpp"
+---
+
+- Keep transport, protocol, business logic, storage, and utility concerns separated where the existing codebase allows.
+- Do not mix protocol parsing with business decision logic unless nearby code already follows that pattern.
+- Prefer explicit ownership and dependency injection over hidden global mutable state.
+- Avoid adding new shared utility modules unless at least two real call sites justify them.
+- When extending a flow, prefer following the existing request lifecycle instead of inserting side paths.
+- If adding a new component, explain where it belongs in the current layering.

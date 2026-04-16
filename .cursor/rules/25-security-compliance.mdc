@@ -1,0 +1,12 @@
+---
+description: "Security, compliance, and sensitive-data rules for backend changes"
+alwaysApply: false
+---
+
+- Treat authentication, authorization, secrets, encryption, auditability, and sensitive data handling as security-critical.
+- Do not log secrets, tokens, raw credentials, private keys, or sensitive payloads.
+- When access control changes, explain who can perform the action before and after the change.
+- When handling external input, mention validation, normalization, injection risk, and malformed-input handling.
+- Prefer parameterized queries, safe parsers, and explicit allowlists over ad hoc string concatenation.
+- For finance- or compliance-adjacent code, mention audit trail, retention, traceability, and error-reporting impact when relevant.
+- If a change affects compliance-sensitive flows, call out which policy, control, or reporting path is impacted.

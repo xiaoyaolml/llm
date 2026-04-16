@@ -1,0 +1,16 @@
+---
+description: "General rules for C++ backend development in this repository"
+alwaysApply: true
+---
+
+- This repository should be treated as a C++ server-backend project.
+- Prefer minimal, local, low-risk changes.
+- Understand existing patterns before introducing new abstractions.
+- Reuse existing utilities, helpers, and infrastructure where possible.
+- Do not rewrite large modules unless explicitly requested.
+- Keep naming, layering, and error-handling style consistent with nearby code.
+- If a request is ambiguous, choose the smallest correct solution and state assumptions.
+- If a change touches public interfaces, call out compatibility impact.
+- Avoid speculative refactors that are not required for the task.
+- For non-trivial work, prefer: understand first, plan second, implement third, validate last.
+- When reviewing code, prioritize correctness, safety, operability, and production impact over style-only feedback.

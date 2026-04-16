@@ -1,0 +1,33 @@
+{
+  "review_report": {
+    "branch": "{{branch}}",
+    "timestamp": "{{timestamp}}",
+    "summary": {
+      "files_changed": {{file_count}},
+      "additions": {{additions}},
+      "deletions": {{deletions}},
+      "total_issues": {{total_issues}},
+      "high_severity": {{high_count}},
+      "medium_severity": {{medium_count}},
+      "low_severity": {{low_count}}
+    },
+    "issues": [
+      {
+        "id": 1,
+        "file": "path/to/file.cpp",
+        "line": 42,
+        "description": "问题描述",
+        "severity": "high",
+        "category": "security",
+        "suggestion": "修改建议",
+        "code_before": "有问题的代码片段",
+        "code_after": "修复后的代码片段"
+      }
+    ],
+    "recommendation": "{{recommendation}}",
+    "next_steps": [
+      "步骤1",
+      "步骤2"
+    ]
+  }
+}

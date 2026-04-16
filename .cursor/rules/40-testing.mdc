@@ -1,0 +1,13 @@
+---
+description: "Testing and verification rules for backend changes"
+alwaysApply: true
+---
+
+- Prefer adding or updating tests when behavior changes.
+- Follow the existing testing style and fixture structure.
+- Do not silently weaken tests to make code pass.
+- If tests are not added, explain why not.
+- Suggest verification steps: build, unit test, integration test, and benchmark when relevant.
+- For bug fixes, try to add a regression test when practical.
+- For parser or protocol changes, include malformed input and boundary-condition coverage.
+- For concurrency-related changes, mention stress-test or repeated-run strategy if unit tests are insufficient.

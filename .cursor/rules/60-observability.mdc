@@ -1,0 +1,13 @@
+---
+description: "Observability rules for logs, metrics, tracing, and production diagnosis"
+alwaysApply: false
+---
+
+- Prefer structured logging over large unstructured text blocks.
+- Include stable identifiers when useful: request_id, connection_id, user_id, shard_id, peer, and error_code.
+- Do not log secrets, tokens, raw credentials, or sensitive payloads.
+- For production issues, prefer adding targeted logs and metrics before invasive code changes.
+- When adding a new failure path, consider whether metrics or tracing tags should be updated.
+- If a bug is hard to reproduce, suggest the smallest observability change that improves diagnosis.
+- When relevant, mention which SLO, alert, dashboard, or runbook should reflect the change.
+- Prefer metrics that help triage latency, error rate, saturation, queue depth, and dependency health.

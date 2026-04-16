@@ -1,0 +1,22 @@
+---
+description: "Concurrency, ownership, and lifetime rules for shared-state code"
+alwaysApply: false
+globs:
+  - "**/*.h"
+  - "**/*.hpp"
+  - "**/*.cc"
+  - "**/*.cpp"
+---
+
+- Before editing shared-state code, explain the thread-safety impact.
+- Be explicit about ownership, lifetime, and destruction ordering.
+- Call out whether code runs on an IO thread, worker thread, timer thread, or arbitrary thread.
+- Avoid introducing detached threads unless explicitly requested.
+- Avoid capturing raw pointers in async callbacks unless lifetime is clearly guaranteed.
+- Prefer RAII and scoped cleanup over manual multi-branch cleanup.
+- If locks are involved, explain lock ordering and potential deadlock risk.
+- If atomics are involved, explain why the chosen memory ordering is sufficient.
+- When modifying queues, pools, or callback registries, discuss shutdown behavior.
+- Highlight any risk of race conditions, ABA, use-after-free, double-close, or re-entrancy.
+- Call out contention hotspots, queue buildup risk, and backpressure behavior when relevant.
+- Avoid prescribing platform-specific thread scheduling or CPU affinity unless the task explicitly targets a known environment and latency budget.

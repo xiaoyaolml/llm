@@ -1,0 +1,23 @@
+---
+description: "Rules for RPC, networking, protocol, and connection lifecycle changes"
+alwaysApply: false
+globs:
+  - "net/**/*.h"
+  - "net/**/*.hpp"
+  - "net/**/*.cc"
+  - "net/**/*.cpp"
+  - "rpc/**/*.h"
+  - "rpc/**/*.hpp"
+  - "rpc/**/*.cc"
+  - "rpc/**/*.cpp"
+---
+
+- Preserve protocol compatibility unless breaking changes are explicitly requested.
+- Be explicit about framing, partial packets, retries, timeouts, and connection teardown.
+- For request/response flows, describe where deadlines, cancellation, and backpressure apply.
+- Do not block IO threads with long-running work.
+- When changing parsing or serialization, mention boundary cases and malformed input handling.
+- For connection lifecycle changes, explain resource cleanup on normal close, timeout, and error close.
+- For retry logic, mention idempotency assumptions.
+- Call out protocol versioning, schema evolution, and client/server compatibility impact when message shapes change.
+- For gateways or market-data style flows, mention deduplication, ordering, replay, and loss-handling assumptions when relevant.

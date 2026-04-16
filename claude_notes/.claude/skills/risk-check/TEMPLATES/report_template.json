@@ -1,0 +1,284 @@
+{
+  "report_id": "RISK-CHK-{{timestamp}}",
+  "metadata": {
+    "generated_at": "{{timestamp_iso}}",
+    "tool_version": "Claude Code v2.1 /risk-check v1.0",
+    "repository": "{{repository}}",
+    "branch": "{{branch}}",
+    "commit_hash": "{{commit_hash}}"
+  },
+  "risk_analysis": {
+    "risk_type": "{{risk_type}}",
+    "calculation_method": "{{calculation_method}}",
+    "data_range": {
+      "days": {{days}},
+      "start_date": "{{start_date}}",
+      "end_date": "{{end_date}}"
+    }
+  },
+  "issues": {
+    "high_severity": [
+      {
+        "id": {{issue_id}},
+        "file": "{{file_path}}",
+        "line_number": {{line_number}},
+        "function": "{{function_name}}",
+        "title": "{{issue_title}}",
+        "description": "{{detailed_description}}",
+        "current_code": "{{current_code_snippet}}",
+        "fixed_code": "{{fixed_code_snippet}}",
+        "business_impact": {
+          "risk_assessment_error": "{{risk_impact}}",
+          "regulatory_compliance": "{{compliance_impact}}",
+          "financial_impact": "{{financial_impact}}"
+        },
+        "validation_command": "{{validation_command}}",
+        "risk_level": "high"
+      }
+    ],
+    "medium_severity": [
+      {
+        "id": {{issue_id}},
+        "file": "{{file_path}}",
+        "line_number": {{line_number}},
+        "title": "{{issue_title}}",
+        "description": "{{description}}",
+        "fixed_code": "{{fixed_code_snippet}}",
+        "business_impact": {
+          "precision_impact": "{{precision_impact}}",
+          "performance_impact": "{{performance_impact}}"
+        },
+        "difficulty_level": {{difficulty_level}},
+        "risk_level": "medium"
+      }
+    ],
+    "low_severity": [
+      {
+        "id": {{issue_id}},
+        "file": "{{file_path}}",
+        "line_number": {{line_number}},
+        "description": "{{description}}",
+        "impact": "{{impact_description}}",
+        "risk_level": "low"
+      }
+    ]
+  },
+  "validation_results": {
+    "numerical_stability": [
+      {
+        "test_name": "{{test_name}}",
+        "result": "{{test_result}}",
+        "tolerance": "{{tolerance}}",
+        "status": "{{status}}"
+      }
+    ],
+    "precision_validation": [
+      {
+        "test_name": "{{test_name}}",
+        "result": "{{test_result}}",
+        "precision": "{{precision_level}}",
+        "status": "{{status}}"
+      }
+    ],
+    "statistical_validation": [
+      {
+        "test_name": "{{test_name}}",
+        "result": "{{test_result}}",
+        "p_value": "{{p_value}}",
+        "status": "{{status}}"
+      }
+    ],
+    "business_validation": [
+      {
+        "test_name": "{{test_name}}",
+        "result": "{{test_result}}",
+        "standard": "{{compliance_standard}}",
+        "status": "{{status}}"
+      }
+    ]
+  },
+  "risk_assessment_summary": {
+    "metrics": {
+      "numerical_stability": {
+        "current_status": "{{stability_status}}",
+        "expected_status": "stable",
+        "gap": "{{stability_gap}}",
+        "priority": "high"
+      },
+      "calculation_precision": {
+        "current_status": "{{precision_status}}",
+        "expected_status": "≥1e-6",
+        "gap": "{{precision_gap}}",
+        "priority": "high"
+      },
+      "var_backtest": {
+        "current_status": "{{var_backtest_status}}",
+        "expected_status": "passed",
+        "gap": "{{backtest_gap}}",
+        "priority": "high"
+      },
+      "monte_carlo_convergence": {
+        "current_status": "{{mc_convergence_status}}",
+        "expected_status": "converged",
+        "gap": "{{convergence_gap}}",
+        "priority": "medium"
+      },
+      "regulatory_compliance": {
+        "current_status": "{{compliance_status}}",
+        "expected_status": "compliant",
+        "gap": "{{compliance_gap}}",
+        "priority": "high"
+      }
+    },
+    "overall_assessment": "{{overall_assessment}}",
+    "deployment_recommendation": "{{deployment_recommendation}}"
+  },
+  "extreme_scenarios": [
+    {
+      "scenario_name": "{{scenario_name}}",
+      "description": "{{scenario_description}}",
+      "current_behavior": "{{current_behavior}}",
+      "expected_behavior": "{{expected_behavior}}",
+      "risk_level": "{{risk_level}}",
+      "fix_suggestion": "{{fix_suggestion}}"
+    }
+  ],
+  "stress_test_results": [
+    {
+      "stress_test_name": "{{test_name}}",
+      "shock_magnitude": "{{shock_magnitude}}",
+      "current_loss": "{{current_loss}}",
+      "expected_loss": "{{expected_loss}}",
+      "difference": "{{difference}}",
+      "acceptable": {{acceptable}}
+    }
+  ],
+  "implementation_plan": {
+    "phase_1": {
+      "name": "Critical Fixes (Immediate)",
+      "priority": "high",
+      "tasks": [
+        {
+          "id": 1,
+          "description": "{{task_description}}",
+          "owner": "{{owner}}",
+          "estimated_time_hours": {{time_estimate}},
+          "impact": "{{impact_description}}",
+          "validation_method": "{{validation_method}}"
+        }
+      ]
+    },
+    "phase_2": {
+      "name": "Medium Priority Fixes (1-3 days)",
+      "priority": "medium",
+      "tasks": [
+        {
+          "id": 2,
+          "description": "{{task_description}}",
+          "owner": "{{owner}}",
+          "estimated_time_hours": {{time_estimate}},
+          "impact": "{{impact_description}}",
+          "validation_method": "{{validation_method}}"
+        }
+      ]
+    },
+    "phase_3": {
+      "name": "Architecture Improvements (1+ weeks)",
+      "priority": "low",
+      "tasks": [
+        {
+          "id": 3,
+          "description": "{{task_description}}",
+          "owner": "{{owner}}",
+          "estimated_time_hours": {{time_estimate}},
+          "impact": "{{impact_description}}",
+          "validation_method": "{{validation_method}}"
+        }
+      ]
+    }
+  },
+  "validation_plan": {
+    "numerical_tests": [
+      {
+        "test_name": "Precision Test",
+        "command": "./precision_test --tolerance 1e-6 --iterations 1000",
+        "success_criteria": "All calculations within 1e-6 tolerance",
+        "metrics_to_collect": ["max_error", "mean_error", "std_error"]
+      },
+      {
+        "test_name": "Stability Test",
+        "command": "./stability_test --extreme-values --boundary-conditions",
+        "success_criteria": "No crashes or NaN values under extreme conditions",
+        "metrics_to_collect": ["crash_count", "nan_count", "inf_count"]
+      },
+      {
+        "test_name": "Convergence Test",
+        "command": "./convergence_test --max-paths 100000 --tolerance 1e-4",
+        "success_criteria": "Monte Carlo estimates converge within 1e-4 tolerance",
+        "metrics_to_collect": ["convergence_rate", "final_error", "confidence_interval"]
+      }
+    ],
+    "statistical_tests": [
+      {
+        "test_name": "VaR Backtest",
+        "test_case": "TEST_F(RiskTest, VaRBacktest)",
+        "success_criteria": "EXPECT_TRUE(results.is_valid)",
+        "description": "Validate VaR model accuracy using historical data"
+      },
+      {
+        "test_name": "Monte Carlo Convergence",
+        "test_case": "TEST_F(MonteCarloTest, Convergence)",
+        "success_criteria": "EXPECT_NEAR(estimate_10k, estimate_100k, 1e-3)",
+        "description": "Verify Monte Carlo estimates converge with increasing paths"
+      }
+    ],
+    "business_tests": [
+      {
+        "test_name": "Basel III Compliance",
+        "test_case": "TEST_F(ComplianceTest, BaselIIIRequirements)",
+        "success_criteria": "EXPECT_GE(capital_requirement, minimum_capital_ratio * risk_weighted_assets)",
+        "description": "Ensure risk calculations meet Basel III capital requirements"
+      },
+      {
+        "test_name": "Financial Crisis Stress Test",
+        "test_case": "TEST_F(StressTest, FinancialCrisis2008)",
+        "success_criteria": "EXPECT_LE(losses, maximum_acceptable_loss)",
+        "description": "Test portfolio resilience under 2008 financial crisis conditions"
+      }
+    ]
+  },
+  "recommendations": {
+    "immediate_actions": [
+      "{{immediate_action_1}}",
+      "{{immediate_action_2}}",
+      "{{immediate_action_3}}"
+    ],
+    "long_term_improvements": [
+      "{{long_term_suggestion_1}}",
+      "{{long_term_suggestion_2}}",
+      "{{long_term_suggestion_3}}"
+    ],
+    "tools_and_resources": {
+      "numerical_validation": [
+        "MATLAB",
+        "R",
+        "Python (NumPy/SciPy)"
+      ],
+      "statistical_testing": [
+        "R",
+        "Python (scipy.stats)"
+      ],
+      "rng_testing": [
+        "TestU01",
+        "Dieharder"
+      ],
+      "documentation": [
+        "https://internal-docs.company.com/risk",
+        "https://quantlib.org/documentation/"
+      ]
+    }
+  },
+  "confidence_score": {{confidence_score}},
+  "review_status": "{{review_status}}",
+  "next_review_date": "{{next_review_date}}"
+}

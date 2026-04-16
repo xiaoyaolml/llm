@@ -1,0 +1,12 @@
+---
+description: "Risk logic, data quality, protocol correctness, and API evolution rules"
+alwaysApply: false
+---
+
+- For numerical or risk-related logic, mention precision, rounding, overflow, underflow, and invariants.
+- Prefer explicit units, ranges, and domain assumptions for prices, quantities, timestamps, rates, and limits.
+- When data pipelines change, call out completeness, timeliness, ordering, deduplication, and consistency expectations.
+- For protocol or schema changes, explain backward compatibility, versioning, and error semantics.
+- For API changes, explain request/response contract impact and migration expectations for callers.
+- When validating strategies, backtests, or simulations, distinguish between logic correctness, data quality, and production realism.
+- If domain-specific formulas or limits change, recommend regression tests and representative boundary cases.

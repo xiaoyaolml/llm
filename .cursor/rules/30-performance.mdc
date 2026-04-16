@@ -1,0 +1,22 @@
+---
+description: "Performance-sensitive coding rules for hot paths"
+alwaysApply: false
+globs:
+  - "**/*.h"
+  - "**/*.hpp"
+  - "**/*.cc"
+  - "**/*.cpp"
+---
+
+- Treat request processing, serialization, parsing, scheduling, and hot-path logging as performance-sensitive.
+- Avoid unnecessary heap allocations on hot paths.
+- Avoid unnecessary temporary strings, copies, and format conversions.
+- Prefer moving work out of locks rather than doing more work under locks.
+- Mention algorithmic complexity when touching loops, maps, queues, or batching logic.
+- If a change may affect tail latency, say so explicitly.
+- Prefer small, measurable optimizations over broad speculative rewrites.
+- If performance is the goal, propose how to benchmark before and after.
+- Call out cache locality, false sharing, batching, and backpressure implications when relevant.
+- Prefer profiling, tracing, benchmark data, or concrete hotspot evidence before claiming a bottleneck.
+- Treat latency goals as workload-specific; explain the target budget instead of assuming a universal threshold.
+- For memory-sensitive paths, mention allocation frequency, object lifetime, fragmentation risk, and reuse opportunities.
