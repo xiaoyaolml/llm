@@ -8,6 +8,36 @@
 > 分层索引见 `LAYERED_INDEX.md`，快速导航见 `COMPACT_GUIDE.md`。
 > 支持文档风格约定见 `SUPPORT_DOC_STYLE.md`。
 
+## 🪞 从 Skill 侧看审查阶段
+
+| 审查阶段 | 优先 Skill | 典型问题 |
+| --- | --- | --- |
+| 0. 快速分流 | `code-review` | 还不确定问题属于代码质量、性能、并发、协议还是安全 |
+| 1. 通用实现审查 | `code-review` + `cpp-backend-review` | 普通 PR、边界条件、错误处理、可维护性、C++ 服务端实现质量 |
+| 2. 并发 / 生命周期 / 内存 | `concurrency-review` + `memory-management-review` | 线程安全、锁顺序、shutdown、回调生命周期、泄漏、悬垂引用 |
+| 3. 性能 / 延迟 / 吞吐 | `performance-bottleneck-identification` + `finance-optim` + `network-optimization` + `database-interaction-optimization` + `low-latency-systems-design` | 热点路径、尾延迟、CPU 异常、分配开销、网络瓶颈、数据库交互低效 |
+| 4. 协议 / 风险 / 数据正确性 | `protocol-validate` + `risk-check` + `market-data-validate` + `quant-backtest` + `api-design-review` | 字段兼容性、风控结果异常、行情质量、回测偏差、接口语义问题 |
+| 5. 安全 / 合规 | `security-review` + `compliance-review` | 输入校验、权限边界、敏感信息、审计要求、监管约束 |
+| 6. 云上交付 / 观测 / 演练 | `cloud-native-review` + `system-monitoring` + `trading-simulation` | 部署配置、容量、告警、日志、指标、恢复演练、系统稳定性 |
+| 7. 按需专项 | `ml-model-validate` + `defi-protocol-review` | 强领域语义验证，不属于常规 C++ 服务端主线审查 |
+
+### 最短使用顺序
+
+1. 先用 `code-review` 做总入口。
+2. 如果是 C++ 服务端 PR，追加 `cpp-backend-review`。
+3. 看到锁、原子、回调、析构、资源释放，切到 `concurrency-review` / `memory-management-review`。
+4. 看到尾延迟、吞吐、网络、数据库热点，切到性能组 Skill。
+5. 看到协议字段、行情、风控、回测偏差，切到风险 / 数据 / 协议组 Skill。
+6. 看到权限、审计、脱敏、监管要求，切到 `security-review` / `compliance-review`。
+7. 只有碰到专项场景时，再进入 `ml-model-validate` 或 `defi-protocol-review`。
+
+### 与 Cursor 侧索引的对应关系
+
+- Skill 侧阶段索引：当前文档
+- Playbook 侧阶段索引：[cursor_notes/skill-playbook-quick-reference.md](cursor_notes/skill-playbook-quick-reference.md)
+- 现象分流图：[cursor_notes/problem-symptom-navigation.md](cursor_notes/problem-symptom-navigation.md)
+- 极简速记版：[cursor_notes/review-cheat-sheet.md](cursor_notes/review-cheat-sheet.md)
+
 ## 📁 已创建的技能 (20个)
 
 ```

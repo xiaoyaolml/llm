@@ -1,5 +1,27 @@
 # Claude Skills 与 Cursor Playbooks 速查表
 
+## 按审查阶段选文档
+
+| 审查阶段 | 先看什么 | 适用场景 |
+| --- | --- | --- |
+| 0. 快速分流 | `cursor_notes/review-cheat-sheet.md` | 还没判断问题属于代码质量、并发、性能、协议还是安全 |
+| 1. 问题现象定位 | `cursor_notes/problem-symptom-navigation.md` | 已经看到现象，但还没决定该选哪个 Skill / Playbook / Prompt |
+| 2. 通用审查起步 | `cursor_notes/playbooks/code-review.md` | 普通 PR、实现质量、边界条件、可维护性检查 |
+| 3. C++ 服务端 PR 深入审查 | `cursor_notes/pr_review_templates/cpp-backend-general.md` | 需要按服务端视角补线程、协议、资源、可观测性检查 |
+| 4. 并发 / 生命周期 / 性能 | `cursor_notes/playbooks/performance-latency-review.md` | 锁竞争、尾延迟、吞吐下降、shutdown、回调生命周期 |
+| 5. 风险 / 数据 / 协议正确性 | `cursor_notes/playbooks/risk-data-protocol-review.md` | 协议字段、行情链路、风险计算、回测结果、数据一致性 |
+| 6. 安全 / 合规 | `cursor_notes/playbooks/security-compliance-review.md` | 输入校验、权限、敏感信息、审计要求、合规约束 |
+| 7. 云上交付 / 观测 / 运维 | `cursor_notes/playbooks/cloud-ops-review.md` | 配置、部署、指标、日志、trace、SLO、告警 |
+| 8. 专项领域语义任务 | `cursor_notes/prompts/` | 需要 `ml-model-validation`、`defi-protocol-review`、`trading-simulation` 这类专项 Prompt |
+
+### 最短路径
+
+- 不确定从哪开始：先看 `review-cheat-sheet.md`
+- 已知问题现象：再看 `problem-symptom-navigation.md`
+- 已经知道审查方向：直接进入对应 `playbooks/`
+- 如果是 C++ 服务端 PR：补对应 `pr_review_templates/`
+- 如果是强领域语义任务：最后才进入 `prompts/`
+
 ## 核心 Skill 对应哪些 Cursor Playbooks
 
 | Claude Skill | 推荐 Cursor 资产 |
