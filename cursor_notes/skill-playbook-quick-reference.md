@@ -66,3 +66,21 @@
 - `market-data-validate`
 - `quant-backtest`
 - `trading-simulation`
+## 迁移映射表（Claude Skill → Cursor 资产）
+
+| Claude Skills 主题组 | Cursor 承接方式 |
+| --- | --- |
+| `code-review` + `cpp-backend-review` | `AGENTS.md` + `.cursor/rules/00-general.mdc` + `playbooks/code-review.md` |
+| `concurrency-review` + `memory-management-review` | `.cursor/rules/20-concurrency.mdc` + `playbooks/performance-latency-review.md` |
+| 性能组（`finance-optim` / `network-optimization` / `database-interaction-optimization` / `performance-bottleneck-identification` / `low-latency-systems-design`） | `.cursor/rules/30-performance.mdc` + `.cursor/rules/50-rpc-network.mdc` + `playbooks/performance-latency-review.md` |
+| `security-review` + `compliance-review` | `.cursor/rules/25-security-compliance.mdc` + `playbooks/security-compliance-review.md` |
+| 风险数据组（`risk-check` / `quant-backtest` / `market-data-validate` / `protocol-validate` / `api-design-review`） | `.cursor/rules/35-risk-data-protocols.mdc` + `playbooks/risk-data-protocol-review.md` |
+| `cloud-native-review` + `system-monitoring` + `trading-simulation` | `.cursor/rules/60-observability.mdc` + `playbooks/cloud-ops-review.md` |
+| `ml-model-validate` | `prompts/ml-model-validation.md` |
+| `defi-protocol-review` | `prompts/defi-protocol-review.md` |
+
+## 迁移原则
+
+- **稳定约束** → `.cursor/rules/`
+- **审查流程** → `playbooks/`
+- **专项低频任务** → `prompts/`

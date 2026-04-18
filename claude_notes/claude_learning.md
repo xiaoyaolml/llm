@@ -471,6 +471,90 @@ Agent(Explore,级别=very_thorough) → 并行多个查询
 
 ---
 
-现在您已掌握 Claude Code 的核心功能！**从简单任务开始，逐步探索高级功能，持续优化您的工作流程。** 💪
+现在您已掌握 Claude Code 的核心功能！**从简单任务开始，逐步探索高级功能，持续优化您的工作流程。**
 
-有具体问题？随时提问！
+---
+
+## 互联网金融 C++ 后端开发专项指南
+
+> 以下内容专门面向使用 Claude Code 做互联网金融方向 C++ 服务端开发的场景。
+
+### 与 Skills 的配合
+
+本仓库已建立一套 Claude Skills（见 `.claude/skills/`），覆盖：
+
+| 类别 | Skills |
+| --- | --- |
+| 核心审查 | `code-review` / `cpp-backend-review` / `concurrency-review` / `memory-management-review` / `performance-bottleneck-identification` / `security-review` / `protocol-validate` |
+| 金融专项 | `finance-optim` / `risk-check` / `market-data-validate` / `quant-backtest` / `trading-simulation` |
+| 平台运维 | `cloud-native-review` / `system-monitoring` / `compliance-review` |
+
+使用方式：在 Claude 对话中引用 Skill 的 `SKILL.md` 和 `CHECKLISTS/` 作为审查上下文。
+
+### C++ 服务端最佳实践
+
+#### 提问原则
+
+1. **先加"先不要改代码"**：显著提高分析质量
+2. **要求固定输出结构**：当前实现→风险→方案→验证
+3. **明确"最小侵入"**：金融系统不能大面积重构
+4. **明确"线程安全+性能影响"**：C++ 后端刚需
+5. **明确测试边界**："先只写测试" 或 "不允许改测试"
+
+#### 高频提示词
+
+**理解服务框架**：
+```text
+先不要修改代码。请解释这个 C++ 服务端的架构：
+入口、配置加载、网络→业务调用链、线程模型、请求生命周期、日志/指标位置。
+```
+
+**并发风险分析**：
+```text
+请分析这段代码的并发风险（数据竞争、锁顺序、回调生命周期、内存序、死锁/ABA/UAF），不要先改代码。
+```
+
+**性能瓶颈排查**：
+```text
+请分析性能瓶颈（热路径、分配、拷贝、锁竞争、cache locality），给出优化方案和 benchmark 验证方式。
+```
+
+**风险计算验证**（金融特有）：
+```text
+请审查风险计算代码：数值精度、金融单位、边界条件（空头寸/零价格/极值）、
+蒙特卡洛收敛性、回测偏差、回归测试覆盖。
+```
+
+**行情数据验证**（金融特有）：
+```text
+请审查行情数据处理：完整性（缺失/重复/乱序）、准确性（价格跳变/精度）、
+时效性（延迟/过期）、一致性（多源对齐/快照增量）。
+```
+
+#### 推荐工作流
+
+1. **理解阶段**：用 Explore agent 理解调用链、线程模型、所有权
+2. **规划阶段**：用 EnterPlanMode 产出修改点、风险点、测试列表、回滚方案
+3. **实施阶段**：小步执行（接口→实现→测试→文档）
+4. **验证阶段**：编译 + 单测 + 静态检查 + benchmark
+
+#### 工程配置建议
+
+让 Claude 更稳定地协作，需要工程基础设施：
+
+- `compile_commands.json`：C++ 智能体验的基础
+- `.clang-format` + `.clang-tidy`：风格统一 + 静态检查
+- `CMakePresets.json`：debug / release / asan / tsan 一键构建
+- 统一的 build / test / format / tidy 脚本
+
+### 与 Cursor 的协作分工
+
+| 工具 | 适合场景 |
+| --- | --- |
+| Claude Code（终端） | 长对话审查、多轮分析、复杂推理、CI/CD 集成 |
+| Cursor（IDE） | 代码补全、跨文件修改、Plan Mode、实时 diff 审查 |
+
+建议混合使用：  
+- Cursor 做日常开发和快速改动
+- Claude Code 做深度审查和复杂分析
+- Skills 作为两者共享的领域知识库

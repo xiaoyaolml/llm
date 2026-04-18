@@ -346,327 +346,73 @@ jobs:
 
 ---
 
-## 🚀 快速开始指南
 
-### 1. 安装所有技能
+---
 
-```bash
-# 技能已安装在 ~/.claude/skills/
-# 重启 Claude Code 使技能生效
-claude restart
-```
+## 使用方式
 
-### 2. 验证技能列表
+这批 Skills 不是通过 CLI 命令调用的独立工具。它们是一套**领域知识库和审查清单库**。
 
-```bash
-# 检查可用技能
-claude /help
-```
+### 在 Cursor 中使用
 
-应该看到：
+这些 Skills 的核心价值已迁移到 Cursor 侧：
 
-- `/review` - 通用代码审查
-- `/finance-optim` - 金融性能优化
-- `/risk-check` - 风险计算验证
-- `/compliance-review` - 合规性审查
-- `/concurrency-review` - 高频并发审查
-- `/protocol-validate` - 金融协议验证
-- `/quant-backtest` - 量化策略回测验证
-- `/market-data-validate` - 市场数据质量验证
-- `/network-optimization` - 网络性能优化
-- `/database-interaction-optimization` - 数据库交互优化
-- `/performance-bottleneck-identification` - 性能瓶颈识别
-- `/security-review` - 安全审查
-- `/low-latency-systems-design` - 低延迟系统设计
+| 内容类型 | 去哪里找 |
+| --- | --- |
+| 长期规则约束 | `.cursor/rules/` |
+| 审查流程 | `cursor_notes/playbooks/` |
+| C++ PR 审查模板 | `cursor_notes/pr_review_templates/` |
+| 专项 Prompt | `cursor_notes/prompts/` |
+| 快速导航 | `cursor_notes/review-cheat-sheet.md` |
+| 现象分流图 | `cursor_notes/problem-symptom-navigation.md` |
 
-### 3. 运行首次审查
+### 在 Claude 中使用
 
-```bash
-# 测试通用审查
-/review tools/excels.py
+直接引用 Skill 目录下的 `SKILL.md`、`CHECKLISTS/`、`TEMPLATES/` 作为审查上下文。
 
-# 测试性能优化
-/finance-optim tools/excels.py
+例如：
 
-# 测试风险计算
-/risk-check tools/excels.py
-
-# 测试合规性
-/compliance-review tools/excels.py
-
-# 测试并发审查
-/concurrency-review tools/excels.py
-
-# 测试协议验证
-/protocol-validate tools/excels.py
-
-# 测试量化回测
-/quant-backtest tools/excels.py
-
-# 测试市场数据验证
-/market-data-validate tools/excels.py
-
-# 测试网络性能优化
-/network-optimization tools/excels.py
-
-# 测试数据库交互优化
-/database-interaction-optimization tools/excels.py
-
-# 测试性能瓶颈识别
-/performance-bottleneck-identification tools/excels.py
-
-# 测试安全审查
-/security-review tools/excels.py
-
-# 测试低延迟系统设计
-/low-latency-systems-design tools/excels.py
+```text
+请参考 .claude/skills/concurrency-review/SKILL.md 中的审查重点，
+对当前改动做并发安全审查。
 ```
 
 ---
 
-## 📋 团队协作建议
+## 学习路径建议
 
-### 技能共享
+### 入门
 
-```bash
-# 创建团队技能仓库
-git init finance-skills
-cp -r ~/.claude/skills/* finance-skills/
-git add . && git commit -m "Add financial development skills"
-git remote add origin https://your-git-server/finance-skills.git
-git push -u origin master
+1. 从 `code-review` 开始，理解通用代码质量标准
+2. 用 `cpp-backend-review` 理解 C++ 服务端专项关注点
+3. 用 `concurrency-review` 理解并发审查重点
 
-# 团队成员安装
-git clone https://your-git-server/finance-skills.git ~/.claude/skills/
-```
+### 进阶
 
-### 规则定制流程
+1. 深入 `performance-bottleneck-identification` + `finance-optim` 做性能分析
+2. 掌握 `risk-check` + `market-data-validate` 做金融数据验证
+3. 学习 `protocol-validate` 做协议兼容性审查
+4. 了解 `security-review` + `compliance-review` 做安全合规审查
 
-1. **发现问题**: 团队发现新的代码模式或合规要求
-2. **更新规则**: 编辑对应技能的 `RULES.md` 或 `CHECKLISTS/`
-3. **测试验证**: 使用测试代码验证新规则
-4. **团队评审**: 团队评审规则变更
-5. **发布更新**: 更新团队技能仓库
+### 高级
+
+1. 组合多个 Skill 做跨维度审查
+2. 定制和扩展现有 Skill 的清单与模板
+3. 建立团队级审查规范，融入 CI/CD
 
 ---
 
-## 🎓 学习路径建议
+## 维护建议
 
-### 初级开发者
-
-1. 从 `/code-review` 开始，理解通用代码质量标准
-2. 学习 `/finance-optim` 基础性能优化
-3. 了解金融代码的特殊要求
-
-### 中级开发者
-
-1. 深入 `/finance-optim` 性能优化技巧
-2. 掌握 `/risk-check` 数值计算最佳实践
-3. 学习 `/concurrency-review` 并发编程
-4. 了解 `/protocol-validate` 协议实现
-5. 学习 `/quant-backtest` 量化策略验证
-6. 学习 `/market-data-validate` 市场数据验证
-7. 学习 `/ml-model-validate` 机器学习模型验证
-8. 学习 `/cloud-native-review` 云原生应用审查
-9. 学习 `/trading-simulation` 交易模拟器审查
-10. 学习 `/system-monitoring` 系统监控审查
-11. 学习 `/defi-protocol-review` DeFi协议审查
-12. 学习 `/cpp-backend-review` C++后端专项审查
-
-### 高级开发者
-
-1. 精通所有技能的高级用法
-2. 能够定制和扩展现有技能
-3. 建立团队技能库和规则体系
-4. 设计新的金融领域特定技能
-5. 指导团队成员使用技能体系
+- 核心 Skill 优先保持高质量
+- 不再在各 Skill 中重复 CLI 安装说明
+- 重复主题优先收敛到共享 Playbook
+- 每次线上事故补一条清单项
+- 每次性能优化补一条模板
 
 ---
 
-## 🔮 下一步技能建议
-
-### 已创建的技能
-
-✅ `/concurrency-review` - 高频并发审查
-✅ `/protocol-validate` - 金融协议验证（FIX/FAST/OUCH/ITCH）
-✅ `/quant-backtest` - 量化策略回测验证
-✅ `/market-data-validate` - 市场数据质量检查
-
-### 可选扩展技能
-
-#### 1. 人工智能领域
-
-- `/ml-model-validate` - 机器学习模型验证
-  - 模型输入输出验证
-  - 特征工程检查
-  - 模型漂移检测
-  - 公平性和偏见检查
-
-#### 2. 区块链金融领域
-
-- `/defi-protocol-review` - DeFi协议审查
-  - 智能合约安全性
-  - 流动性池机制
-  - 价格预言机验证
-  - 治理机制检查
-
-#### 3. 云原生领域
-
-- `/cloud-native-review` - 云原生应用审查
-  - 容器化部署检查
-  - 微服务架构验证
-  - 服务网格配置
-  - 自动扩缩容机制
-
-#### 4. 系统运维领域
-
-- `/trading-simulation` - 交易模拟器审查
-
-  - 压力测试场景验证
-  - 性能基准测试
-  - 故障恢复测试
-  - 容错能力评估
-- `/system-monitoring` - 系统监控审查
-
-  - 监控指标完整性
-  - 告警规则合理性
-  - 日志收集完整性
-  - 性能阈值设置
-
----
-
-## 💡 最佳实践
-
-### 1. 定期审查
-
-```bash
-# 每日自动审查（crontab）
-0 9 * * * cd /path/to/project && claude /review --high-priority-only
-
-# 每周完整审查
-0 9 * * 1 cd /path/to/project && ./run_complete_review.sh
-```
-
-### 2. 提交前审查
-
-```bash
-# Git pre-commit hook
-#!/bin/bash
-claude /review -s --high-priority-only || exit 1
-```
-
-### 3. 代码审查工作流
-
-```bash
-# 1. 本地开发
-/finance-optim src/new_feature.cpp
-/concurrency-review src/new_feature.cpp
-
-# 2. 提交前
-git add .
-/review -s
-
-# 3. PR 审查
-/risk-check src/changed_files/
-/compliance-review src/changed_files/
-/protocol-validate src/changed_files/
-/quant-backtest src/changed_files/
-/market-data-validate src/changed_files/
-```
-
-### 4. 生产环境部署前
-
-```bash
-# 部署前完整审查
-./run_pre_deploy_check.sh
-
-# 脚本内容：
-#!/bin/bash
-echo "🚀 执行部署前完整审查..."
-
-# 性能审查
-claude /finance-optim src/ --output json > perf_report.json
-
-# 并发审查
-claude /concurrency-review src/ --output json > conc_report.json
-
-# 协议验证
-claude /protocol-validate src/ --output json > proto_report.json
-
-# 风险验证
-claude /risk-check src/ --output json > risk_report.json
-
-# 合规审查
-claude /compliance-review src/ --output json > comp_report.json
-
-# 量化回测
-claude /quant-backtest src/ --output json > backtest_report.json
-
-# 数据验证
-claude /market-data-validate src/ --output json > data_report.json
-
-# 通用审查
-claude /review src/ --output json > code_report.json
-
-echo "✅ 部署前审查完成"
-```
-
----
-
-## 📞 支持与维护
-
-### 技能维护
-
-- **定期更新**: 每月检查一次规则更新
-- **团队反馈**: 收集团队使用反馈
-- **合规更新**: 跟踪法规变化并更新规则
-- **技术演进**: 跟踪新技术发展更新技能
-
-### 问题排查
-
-- **技能不工作**: 重启 Claude Code
-- **规则不匹配**: 检查关键词配置
-- **报告格式错误**: 检查模板文件权限
-- **性能问题**: 检查技能实现和规则复杂度
-
----
-
-## 🎯 技能发展路线图
-
-### 短期目标（1-3个月）
-
-1. ✅ 完善现有8个核心技能
-2. 🔄 建立技能更新和维护机制
-3. 👥 在团队内推广使用
-4. 📊 收集使用反馈并优化
-
-### 中期目标（3-6个月）
-
-1. 🚀 开发 `/ml-model-validate` 机器学习模型验证技能
-2. 🌐 开发 `/defi-protocol-review` DeFi协议审查技能
-3. ☁️ 开发 `/cloud-native-review` 云原生审查技能
-4. 📈 建立技能使用度量和效果评估
-
-### 长期目标（6-12个月）
-
-1. 🤖 开发 `/trading-simulation` 交易模拟器审查技能
-2. 🌐 建立企业级技能库和知识管理体系
-3. 🎓 培训更多开发者使用技能体系
-4. 🚀 建立技能生态和社区贡献机制
-
----
-
-**技能版本**: v8.0 (2026-04-09)
-**技能总数**: 18个核心技能 + 未来扩展
-**适用行业**: 互联网金融、量化交易、风险管理、合规审计、DeFi、区块链金融、云原生金融、人工智能金融、数据库性能优化、网络性能优化、系统性能瓶颈识别、金融安全、高频交易、低延迟系统
-**目标用户**: 金融开发人员、量化研究员、系统架构师、AI工程师、DevOps工程师、数据库管理员、性能工程师、安全工程师、高频交易开发团队
-
-**最新更新**:
-- v8.0: 新增低延迟系统设计技能 (low-latency-systems-design)
-- v7.0: 新增安全审查技能 (security-review)
-- v6.0: 新增性能瓶颈识别技能 (performance-bottleneck-identification)
-- v5.0: 新增数据库交互优化技能 (database-interaction-optimization)
-- v5.0: 新增网络性能优化技能 (network-optimization)
-- v5.0: 更新技能对比矩阵，增加新技能维度
-
-需要创建更多技能或定制现有技能，请继续提问！
+**状态**：21 个 Skills，分为 核心(7) / 专项(12) / 按需(2)  
+**Cursor 映射**：见 `cursor_notes/claude-skills-to-cursor-mapping.md`  
+**分层索引**：见 `LAYERED_INDEX.md`  
+**精简导航**：见 `COMPACT_GUIDE.md`
