@@ -8,3 +8,6 @@
 + C++
 + Python
 + Markdown
++ copilot
++ claude
++ cursor
